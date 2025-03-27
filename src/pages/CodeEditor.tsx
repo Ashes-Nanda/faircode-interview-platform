@@ -2,13 +2,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, Clock, MessageSquare, Code, Check, X, AlertCircle } from 'lucide-react';
+import { ArrowLeft, User, Clock, MessageSquare, Code, Check, X, AlertCircle, Shield, Server } from 'lucide-react';
 
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { CodeEditorPanel } from '@/components/CodeEditorPanel';
 import { Button } from '@/components/Button';
 import AnimatedTransition from '@/components/AnimatedTransition';
+import { toast } from 'sonner';
 
 // Mock question data
 const demoQuestion = {
@@ -43,6 +44,12 @@ const CodeEditor = () => {
   const [language, setLanguage] = useState<'java' | 'cpp' | 'python'>('java');
   const [remainingTime, setRemainingTime] = useState(45 * 60); // 45 minutes in seconds
   const [tabView, setTabView] = useState<'problem' | 'discussion'>('problem');
+  const [sandboxInfo, setSandboxInfo] = useState({
+    environment: 'Docker Container',
+    memoryLimit: '256MB',
+    timeLimit: '10s',
+    securityLevel: 'High'
+  });
   
   // Countdown timer
   useEffect(() => {
@@ -58,6 +65,20 @@ const CodeEditor = () => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Handle code run
+  const handleCodeRun = (code: string) => {
+    console.log('Code executed:', code);
+    
+    // Detect certain patterns that might be security risks (for demo purposes)
+    if (code.includes('System.') && code.includes('exit') || 
+        code.includes('Runtime') || 
+        code.includes('ProcessBuilder')) {
+      toast.warning('Security alert: Potentially unsafe system operation detected', {
+        description: 'Your code contains operations that could pose security risks.'
+      });
+    }
   };
 
   // Scroll to top on page load
@@ -258,16 +279,47 @@ const CodeEditor = () => {
                   
                   <CodeEditorPanel
                     language={language}
-                    onRun={(code) => console.log("Code executed:", code)}
+                    onRun={handleCodeRun}
                   />
                   
-                  <div className="bg-soft-blue rounded-lg p-4 border border-brand-100">
+                  {/* Sandbox Information */}
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <div className="flex items-start gap-3">
-                      <AlertCircle className="h-5 w-5 text-brand-600 shrink-0 mt-0.5" />
+                      <Shield className="h-5 w-5 text-brand-600 shrink-0 mt-0.5" />
                       <div>
-                        <h3 className="font-medium mb-1 text-brand-900">Important Information</h3>
-                        <p className="text-sm text-brand-800">
-                          This session is being monitored. Avoid switching tabs, copying code from external sources, or using unauthorized tools. Your code will be automatically saved.
+                        <h3 className="font-medium mb-2 text-brand-900">Secure Sandbox Environment</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="bg-white rounded-md p-3 border border-gray-100">
+                            <div className="flex items-center text-sm mb-1 text-muted-foreground">
+                              <Server className="h-3.5 w-3.5 mr-1.5" />
+                              Environment
+                            </div>
+                            <div className="font-medium">{sandboxInfo.environment}</div>
+                          </div>
+                          <div className="bg-white rounded-md p-3 border border-gray-100">
+                            <div className="flex items-center text-sm mb-1 text-muted-foreground">
+                              <Clock className="h-3.5 w-3.5 mr-1.5" />
+                              Time Limit
+                            </div>
+                            <div className="font-medium">{sandboxInfo.timeLimit}</div>
+                          </div>
+                          <div className="bg-white rounded-md p-3 border border-gray-100">
+                            <div className="flex items-center text-sm mb-1 text-muted-foreground">
+                              <AlertCircle className="h-3.5 w-3.5 mr-1.5" />
+                              Memory Limit
+                            </div>
+                            <div className="font-medium">{sandboxInfo.memoryLimit}</div>
+                          </div>
+                          <div className="bg-white rounded-md p-3 border border-gray-100">
+                            <div className="flex items-center text-sm mb-1 text-muted-foreground">
+                              <Shield className="h-3.5 w-3.5 mr-1.5" />
+                              Security Level
+                            </div>
+                            <div className="font-medium">{sandboxInfo.securityLevel}</div>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-3">
+                          Your code is executed in a secure, isolated environment. System calls and network access are restricted.
                         </p>
                       </div>
                     </div>
