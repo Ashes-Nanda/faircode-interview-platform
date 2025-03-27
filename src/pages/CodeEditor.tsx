@@ -9,10 +9,11 @@ import { CodeEditorPanel } from '@/components/CodeEditorPanel';
 import { Button } from '@/components/Button';
 import AnimatedTransition from '@/components/AnimatedTransition';
 import BehavioralAnalytics from '@/components/BehavioralAnalytics';
+import LiveInterview from '@/components/LiveInterview';
+import AntiCheatSettings from '@/components/AntiCheatSettings';
 import { BehavioralSession } from '@/services/behavioralAnalyticsService';
 import { toast } from 'sonner';
 
-// Mock question data
 const demoQuestion = {
   title: "Two Sum",
   difficulty: "Easy",
@@ -52,12 +53,16 @@ const CodeEditor = () => {
     securityLevel: 'High'
   });
   
-  // Behavioral analytics state
   const [session, setSession] = useState<BehavioralSession | null>(null);
   const [honestyScore, setHonestyScore] = useState<number>(100);
   const [flagDescriptions, setFlagDescriptions] = useState<{ [key: string]: string }>({});
   
-  // Countdown timer
+  const [antiCheatMode, setAntiCheatMode] = useState<'passive' | 'active'>('passive');
+  const [interventionsEnabled, setInterventionsEnabled] = useState(true);
+  const [interceptedEvents, setInterceptedEvents] = useState<string[]>([]);
+  
+  const [isInterviewActive, setIsInterviewActive] = useState(false);
+  
   useEffect(() => {
     const timer = setInterval(() => {
       setRemainingTime(prev => (prev > 0 ? prev - 1 : 0));
@@ -66,18 +71,15 @@ const CodeEditor = () => {
     return () => clearInterval(timer);
   }, []);
   
-  // Format time as MM:SS
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Handle code run
   const handleCodeRun = (code: string) => {
     console.log('Code executed:', code);
     
-    // Detect certain patterns that might be security risks (for demo purposes)
     if (code.includes('System.') && code.includes('exit') || 
         code.includes('Runtime') || 
         code.includes('ProcessBuilder')) {
@@ -87,7 +89,6 @@ const CodeEditor = () => {
     }
   };
 
-  // Handle behavioral analytics updates
   const handleBehavioralUpdate = (
     updatedSession: BehavioralSession, 
     updatedScore: number, 
@@ -97,7 +98,6 @@ const CodeEditor = () => {
     setHonestyScore(updatedScore);
     setFlagDescriptions(updatedFlags);
     
-    // Alert the interviewer about new flags
     const prevFlagsCount = Object.keys(flagDescriptions).length;
     const newFlagsCount = Object.keys(updatedFlags).length;
     
@@ -108,7 +108,32 @@ const CodeEditor = () => {
     }
   };
 
-  // Scroll to top on page load
+  const toggleInterviewSession = () => {
+    if (!isInterviewActive) {
+      setIsInterviewActive(true);
+      sessionStorage.setItem('interview_active', 'true');
+      toast.success('Live interview session started');
+    } else {
+      setIsInterviewActive(false);
+      sessionStorage.setItem('interview_active', 'false');
+      toast.info('Live interview session ended');
+    }
+  };
+
+  const handleAntiCheatModeChange = (mode: 'passive' | 'active') => {
+    setAntiCheatMode(mode);
+    toast.info(`Anti-cheat mode set to ${mode}`);
+  };
+
+  const handleToggleInterventions = (enabled: boolean) => {
+    setInterventionsEnabled(enabled);
+    toast.info(enabled ? 'Candidate warnings enabled' : 'Candidate warnings disabled');
+  };
+
+  const recordInterceptedEvent = (eventType: string) => {
+    setInterceptedEvents(prev => [...prev, eventType]);
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -143,8 +168,12 @@ const CodeEditor = () => {
                   </div>
                   
                   <div className="hidden sm:flex">
-                    <Button size="sm" variant="outline">
-                      End Session
+                    <Button 
+                      size="sm" 
+                      variant={isInterviewActive ? "destructive" : "outline"}
+                      onClick={toggleInterviewSession}
+                    >
+                      {isInterviewActive ? "End Session" : "Start Live Interview"}
                     </Button>
                   </div>
                 </div>
@@ -154,10 +183,8 @@ const CodeEditor = () => {
           
           <div className="container px-4 sm:px-6 py-6">
             <div className="grid lg:grid-cols-5 gap-6">
-              {/* Left side - Question Panel */}
               <div className="lg:col-span-2">
                 <div className="bg-white rounded-xl shadow-soft border overflow-hidden">
-                  {/* Tab navigation */}
                   <div className="flex border-b">
                     <button
                       onClick={() => setTabView('problem')}
@@ -181,7 +208,6 @@ const CodeEditor = () => {
                     </button>
                   </div>
                   
-                  {/* Tab content */}
                   <div className="p-6">
                     {tabView === 'problem' ? (
                       <div className="space-y-4">
@@ -228,7 +254,6 @@ const CodeEditor = () => {
                         </p>
                         
                         <div className="bg-gray-50 rounded-lg p-4 border space-y-4 max-h-[400px] overflow-y-auto">
-                          {/* Mock conversation */}
                           <div className="flex gap-3">
                             <div className="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center flex-shrink-0">
                               <User className="h-4 w-4 text-brand-800" />
@@ -257,7 +282,6 @@ const CodeEditor = () => {
                           </div>
                         </div>
                         
-                        {/* Message input */}
                         <div className="flex gap-2">
                           <input
                             type="text"
@@ -269,27 +293,95 @@ const CodeEditor = () => {
                       </div>
                     )}
                   </div>
-                </div>
-                
-                {/* Behavioral Analytics Panel (only visible to interviewer) */}
-                {session && (
-                  <div className="mt-6 bg-white rounded-xl shadow-soft border overflow-hidden">
-                    <div className="p-4 border-b bg-gray-50 flex items-center">
-                      <Eye className="h-4 w-4 mr-2 text-brand-600" />
-                      <h3 className="text-sm font-medium">Interviewer View Only</h3>
-                    </div>
-                    <div className="p-4">
-                      <BehavioralAnalytics
-                        session={session}
-                        honestyScore={honestyScore}
-                        flagDescriptions={flagDescriptions}
+                  
+                  {isInterviewActive && (
+                    <div className="mt-6">
+                      <LiveInterview 
+                        isInterviewer={false}
+                        candidateName="John Doe"
+                        interviewerName="Jane Smith"
                       />
                     </div>
+                  )}
+                  
+                  {session && (
+                    <div className="mt-6 bg-white rounded-xl shadow-soft border overflow-hidden">
+                      <div className="p-4 border-b bg-gray-50 flex items-center">
+                        <Eye className="h-4 w-4 mr-2 text-brand-600" />
+                        <h3 className="text-sm font-medium">Interviewer View Only</h3>
+                      </div>
+                      <div className="p-4">
+                        <BehavioralAnalytics
+                          session={session}
+                          honestyScore={honestyScore}
+                          flagDescriptions={flagDescriptions}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
+                  {session && (
+                    <div className="mt-6 bg-white rounded-xl shadow-soft border overflow-hidden">
+                      <div className="p-4 border-b bg-gray-50 flex items-center">
+                        <Shield className="h-4 w-4 mr-2 text-brand-600" />
+                        <h3 className="text-sm font-medium">Anti-Cheat Protection</h3>
+                      </div>
+                      <div className="p-4">
+                        <AntiCheatSettings
+                          antiCheatMode={antiCheatMode}
+                          setAntiCheatMode={handleAntiCheatModeChange}
+                          interventionsEnabled={interventionsEnabled}
+                          toggleInterventions={handleToggleInterventions}
+                          interceptedEvents={interceptedEvents}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-start gap-3">
+                    <Shield className="h-5 w-5 text-brand-600 shrink-0 mt-0.5" />
+                    <div>
+                      <h3 className="font-medium mb-2 text-brand-900">Secure Sandbox Environment</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="bg-white rounded-md p-3 border border-gray-100">
+                          <div className="flex items-center text-sm mb-1 text-muted-foreground">
+                            <Server className="h-3.5 w-3.5 mr-1.5" />
+                            Environment
+                          </div>
+                          <div className="font-medium">{sandboxInfo.environment}</div>
+                        </div>
+                        <div className="bg-white rounded-md p-3 border border-gray-100">
+                          <div className="flex items-center text-sm mb-1 text-muted-foreground">
+                            <Clock className="h-3.5 w-3.5 mr-1.5" />
+                            Time Limit
+                          </div>
+                          <div className="font-medium">{sandboxInfo.timeLimit}</div>
+                        </div>
+                        <div className="bg-white rounded-md p-3 border border-gray-100">
+                          <div className="flex items-center text-sm mb-1 text-muted-foreground">
+                            <AlertCircle className="h-3.5 w-3.5 mr-1.5" />
+                            Memory Limit
+                          </div>
+                          <div className="font-medium">{sandboxInfo.memoryLimit}</div>
+                        </div>
+                        <div className="bg-white rounded-md p-3 border border-gray-100">
+                          <div className="flex items-center text-sm mb-1 text-muted-foreground">
+                            <Shield className="h-3.5 w-3.5 mr-1.5" />
+                            Security Level
+                          </div>
+                          <div className="font-medium">{sandboxInfo.securityLevel}</div>
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-3">
+                        Your code is executed in a secure, isolated environment. System calls and network access are restricted.
+                      </p>
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
               
-              {/* Right side - Code Editor */}
               <div className="lg:col-span-3">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
@@ -327,7 +419,6 @@ const CodeEditor = () => {
                     onBehavioralUpdate={handleBehavioralUpdate}
                   />
                   
-                  {/* Sandbox Information */}
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <div className="flex items-start gap-3">
                       <Shield className="h-5 w-5 text-brand-600 shrink-0 mt-0.5" />
