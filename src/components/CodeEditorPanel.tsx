@@ -6,12 +6,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './Button';
 import { compileAndExecuteCode } from '@/services/compilerService';
 import CodeExecutionResults from './CodeExecutionResults';
+import useBehavioralTracking from '@/hooks/useBehavioralTracking';
 import { toast } from 'sonner';
 
 interface CodeEditorPanelProps {
   initialCode?: string;
   language?: 'java' | 'cpp' | 'python';
   onRun?: (code: string) => void;
+  onBehavioralUpdate?: (session: any, score: number, flags: { [key: string]: string }) => void;
   className?: string;
 }
 
@@ -19,6 +21,7 @@ export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
   initialCode = '// Write your code here\n\n',
   language = 'java',
   onRun,
+  onBehavioralUpdate,
   className,
 }) => {
   const [code, setCode] = useState(initialCode);
@@ -29,6 +32,39 @@ export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
   const [executionTime, setExecutionTime] = useState<number>(0);
   const [executionError, setExecutionError] = useState<string | null>(null);
   const [executionSuccess, setExecutionSuccess] = useState<boolean>(false);
+  
+  // Use the behavioral tracking hook
+  const {
+    session,
+    honestyScore,
+    flagDescriptions,
+    startTracking,
+    trackKeystroke,
+    trackPaste,
+    isTracking
+  } = useBehavioralTracking();
+
+  // Start tracking when the component mounts
+  useEffect(() => {
+    startTracking();
+  }, [startTracking]);
+
+  // Update parent component with behavioral data whenever it changes
+  useEffect(() => {
+    if (onBehavioralUpdate) {
+      onBehavioralUpdate(session, honestyScore, flagDescriptions);
+    }
+  }, [session, honestyScore, flagDescriptions, onBehavioralUpdate]);
+
+  const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCode(e.target.value);
+    trackKeystroke();
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const pastedText = e.clipboardData.getData('text');
+    trackPaste(pastedText.length);
+  };
 
   const handleRunCode = async () => {
     setIsRunning(true);
@@ -204,7 +240,8 @@ greet()`,
                 {/* Code area */}
                 <textarea
                   value={code}
-                  onChange={(e) => setCode(e.target.value)}
+                  onChange={handleCodeChange}
+                  onPaste={handlePaste}
                   className="flex-1 p-2 resize-none font-mono text-sm focus:outline-none"
                   spellCheck="false"
                 />

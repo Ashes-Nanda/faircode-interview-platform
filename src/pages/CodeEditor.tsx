@@ -1,14 +1,15 @@
-
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, Clock, MessageSquare, Code, Check, X, AlertCircle, Shield, Server } from 'lucide-react';
+import { ArrowLeft, User, Clock, MessageSquare, Code, Check, X, AlertCircle, Shield, Server, Eye } from 'lucide-react';
 
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { CodeEditorPanel } from '@/components/CodeEditorPanel';
 import { Button } from '@/components/Button';
 import AnimatedTransition from '@/components/AnimatedTransition';
+import BehavioralAnalytics from '@/components/BehavioralAnalytics';
+import { BehavioralSession } from '@/services/behavioralAnalyticsService';
 import { toast } from 'sonner';
 
 // Mock question data
@@ -51,6 +52,11 @@ const CodeEditor = () => {
     securityLevel: 'High'
   });
   
+  // Behavioral analytics state
+  const [session, setSession] = useState<BehavioralSession | null>(null);
+  const [honestyScore, setHonestyScore] = useState<number>(100);
+  const [flagDescriptions, setFlagDescriptions] = useState<{ [key: string]: string }>({});
+  
   // Countdown timer
   useEffect(() => {
     const timer = setInterval(() => {
@@ -77,6 +83,27 @@ const CodeEditor = () => {
         code.includes('ProcessBuilder')) {
       toast.warning('Security alert: Potentially unsafe system operation detected', {
         description: 'Your code contains operations that could pose security risks.'
+      });
+    }
+  };
+
+  // Handle behavioral analytics updates
+  const handleBehavioralUpdate = (
+    updatedSession: BehavioralSession, 
+    updatedScore: number, 
+    updatedFlags: { [key: string]: string }
+  ) => {
+    setSession(updatedSession);
+    setHonestyScore(updatedScore);
+    setFlagDescriptions(updatedFlags);
+    
+    // Alert the interviewer about new flags
+    const prevFlagsCount = Object.keys(flagDescriptions).length;
+    const newFlagsCount = Object.keys(updatedFlags).length;
+    
+    if (newFlagsCount > prevFlagsCount) {
+      toast.warning('New suspicious behavior detected', {
+        description: 'Check the behavioral analytics panel for details.'
       });
     }
   };
@@ -243,6 +270,23 @@ const CodeEditor = () => {
                     )}
                   </div>
                 </div>
+                
+                {/* Behavioral Analytics Panel (only visible to interviewer) */}
+                {session && (
+                  <div className="mt-6 bg-white rounded-xl shadow-soft border overflow-hidden">
+                    <div className="p-4 border-b bg-gray-50 flex items-center">
+                      <Eye className="h-4 w-4 mr-2 text-brand-600" />
+                      <h3 className="text-sm font-medium">Interviewer View Only</h3>
+                    </div>
+                    <div className="p-4">
+                      <BehavioralAnalytics
+                        session={session}
+                        honestyScore={honestyScore}
+                        flagDescriptions={flagDescriptions}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
               
               {/* Right side - Code Editor */}
@@ -280,6 +324,7 @@ const CodeEditor = () => {
                   <CodeEditorPanel
                     language={language}
                     onRun={handleCodeRun}
+                    onBehavioralUpdate={handleBehavioralUpdate}
                   />
                   
                   {/* Sandbox Information */}
