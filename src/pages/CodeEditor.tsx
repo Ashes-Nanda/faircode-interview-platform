@@ -11,7 +11,9 @@ import AnimatedTransition from '@/components/AnimatedTransition';
 import BehavioralAnalytics from '@/components/BehavioralAnalytics';
 import LiveInterview from '@/components/LiveInterview';
 import AntiCheatSettings from '@/components/AntiCheatSettings';
+import CodeSubmissionFeedback from '@/components/CodeSubmissionFeedback';
 import { BehavioralSession } from '@/services/behavioralAnalyticsService';
+import { evaluateCode, EvaluationResult } from '@/services/evaluationService';
 import { toast } from 'sonner';
 
 const demoQuestion = {
@@ -62,6 +64,10 @@ const CodeEditor = () => {
   const [interceptedEvents, setInterceptedEvents] = useState<string[]>([]);
   
   const [isInterviewActive, setIsInterviewActive] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [evaluationResult, setEvaluationResult] = useState<EvaluationResult | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [currentCode, setCurrentCode] = useState('');
   
   useEffect(() => {
     const timer = setInterval(() => {
@@ -78,7 +84,7 @@ const CodeEditor = () => {
   };
 
   const handleCodeRun = (code: string) => {
-    console.log('Code executed:', code);
+    setCurrentCode(code);
     
     if (code.includes('System.') && code.includes('exit') || 
         code.includes('Runtime') || 
@@ -134,6 +140,42 @@ const CodeEditor = () => {
     setInterceptedEvents(prev => [...prev, eventType]);
   };
 
+  const handleCodeSubmit = async () => {
+    if (!currentCode) {
+      toast.error('Please write some code before submitting', {
+        description: 'Your code editor is empty'
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    toast.loading('Evaluating your solution...', { id: 'code-evaluation' });
+    
+    try {
+      const result = await evaluateCode(currentCode, language, demoQuestion.title);
+      setEvaluationResult(result);
+      setShowFeedback(true);
+      
+      if (result.passed) {
+        toast.success('Solution passed tests!', { id: 'code-evaluation' });
+      } else {
+        toast.error('Solution did not pass all tests', { id: 'code-evaluation' });
+      }
+    } catch (error) {
+      console.error('Error evaluating code:', error);
+      toast.error('Failed to evaluate solution', { id: 'code-evaluation' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  const handleRequestDetailedFeedback = () => {
+    toast.success('Feedback request sent to interviewer', {
+      description: 'You will receive detailed feedback soon'
+    });
+    setShowFeedback(false);
+  };
+  
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -182,8 +224,8 @@ const CodeEditor = () => {
           </div>
           
           <div className="container px-4 sm:px-6 py-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              <div className="md:col-span-1 lg:col-span-2">
+            <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-4">
+              <div className="md:col-span-2 lg:col-span-5">
                 <div className="bg-white rounded-xl shadow-soft border overflow-hidden h-full">
                   <div className="flex border-b">
                     <button
@@ -296,7 +338,7 @@ const CodeEditor = () => {
                 </div>
               </div>
               
-              <div className="md:col-span-2 lg:col-span-3">
+              <div className="md:col-span-4 lg:col-span-7">
                 <div className="grid grid-cols-1 gap-4">
                   <div className="bg-white rounded-xl shadow-soft border overflow-hidden">
                     <div className="flex justify-between items-center p-3 border-b">
@@ -321,9 +363,20 @@ const CodeEditor = () => {
                           variant="outline"
                           size="sm"
                           className="gap-1"
+                          onClick={handleCodeSubmit}
+                          disabled={isSubmitting}
                         >
-                          <Check className="h-4 w-4" />
-                          Submit
+                          {isSubmitting ? (
+                            <>
+                              <span className="animate-spin mr-1">⏳</span>
+                              Submitting...
+                            </>
+                          ) : (
+                            <>
+                              <Check className="h-4 w-4" />
+                              Submit
+                            </>
+                          )}
                         </Button>
                       </div>
                     </div>
@@ -337,9 +390,9 @@ const CodeEditor = () => {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-12 gap-4">
                     {isInterviewActive && (
-                      <div className="md:col-span-2">
+                      <div className="col-span-12">
                         <LiveInterview 
                           isInterviewer={false}
                           candidateName="John Doe"
@@ -349,7 +402,7 @@ const CodeEditor = () => {
                     )}
                     
                     {session && (
-                      <div className="bg-white rounded-xl shadow-soft border overflow-hidden">
+                      <div className="col-span-12 md:col-span-6 bg-white rounded-xl shadow-soft border overflow-hidden">
                         <div className="p-3 border-b bg-gray-50 flex items-center">
                           <Eye className="h-4 w-4 mr-2 text-brand-600" />
                           <h3 className="text-sm font-medium">Behavioral Analytics</h3>
@@ -365,7 +418,7 @@ const CodeEditor = () => {
                     )}
                     
                     {session && (
-                      <div className="bg-white rounded-xl shadow-soft border overflow-hidden">
+                      <div className="col-span-12 md:col-span-6 bg-white rounded-xl shadow-soft border overflow-hidden">
                         <div className="p-3 border-b bg-gray-50 flex items-center">
                           <Shield className="h-4 w-4 mr-2 text-brand-600" />
                           <h3 className="text-sm font-medium">Anti-Cheat Protection</h3>
@@ -382,7 +435,7 @@ const CodeEditor = () => {
                       </div>
                     )}
                     
-                    <div className="md:col-span-2 bg-gray-50 rounded-lg p-3 border border-gray-200">
+                    <div className="col-span-12 bg-gray-50 rounded-lg p-3 border border-gray-200">
                       <div className="flex items-start gap-3">
                         <Shield className="h-5 w-5 text-brand-600 shrink-0 mt-0.5" />
                         <div className="flex-1">
@@ -426,6 +479,17 @@ const CodeEditor = () => {
             </div>
           </div>
         </main>
+        
+        {showFeedback && evaluationResult && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <CodeSubmissionFeedback
+              testResults={evaluationResult.testResults}
+              score={evaluationResult.score}
+              onProvideDetailedFeedback={handleRequestDetailedFeedback}
+              onClose={() => setShowFeedback(false)}
+            />
+          </div>
+        )}
         
         <Footer />
       </div>
