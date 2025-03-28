@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -51,7 +50,7 @@ const LiveInterview: React.FC<LiveInterviewProps> = ({
     {
       id: '2',
       sender: 'candidate',
-      text: 'Thanks! I'll get started on the problem right away.',
+      text: "Thanks! I'll get started on the problem right away.",
       timestamp: new Date(Date.now() - 60000)
     }
   ]);
