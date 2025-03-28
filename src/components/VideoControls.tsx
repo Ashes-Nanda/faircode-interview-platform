@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Button } from '@/components/Button';
-import { Mic, MicOff, Video, VideoOff, Maximize, Minimize, MessageSquare, Users, Phone, Calendar } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Mic, MicOff, Video, VideoOff, Maximize, Minimize, MessageSquare, Phone, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface VideoControlsProps {
