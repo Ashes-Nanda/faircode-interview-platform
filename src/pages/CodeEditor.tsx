@@ -182,9 +182,9 @@ const CodeEditor = () => {
           </div>
           
           <div className="container px-4 sm:px-6 py-6">
-            <div className="grid lg:grid-cols-5 gap-6">
-              <div className="lg:col-span-2">
-                <div className="bg-white rounded-xl shadow-soft border overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="md:col-span-1 lg:col-span-2">
+                <div className="bg-white rounded-xl shadow-soft border overflow-hidden h-full">
                   <div className="flex border-b">
                     <button
                       onClick={() => setTabView('problem')}
@@ -208,7 +208,7 @@ const CodeEditor = () => {
                     </button>
                   </div>
                   
-                  <div className="p-6">
+                  <div className="p-4 overflow-auto max-h-[calc(100vh-250px)]">
                     {tabView === 'problem' ? (
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
@@ -293,170 +293,131 @@ const CodeEditor = () => {
                       </div>
                     )}
                   </div>
-                  
-                  {isInterviewActive && (
-                    <div className="mt-6">
-                      <LiveInterview 
-                        isInterviewer={false}
-                        candidateName="John Doe"
-                        interviewerName="Jane Smith"
-                      />
-                    </div>
-                  )}
-                  
-                  {session && (
-                    <div className="mt-6 bg-white rounded-xl shadow-soft border overflow-hidden">
-                      <div className="p-4 border-b bg-gray-50 flex items-center">
-                        <Eye className="h-4 w-4 mr-2 text-brand-600" />
-                        <h3 className="text-sm font-medium">Interviewer View Only</h3>
-                      </div>
-                      <div className="p-4">
-                        <BehavioralAnalytics
-                          session={session}
-                          honestyScore={honestyScore}
-                          flagDescriptions={flagDescriptions}
-                        />
-                      </div>
-                    </div>
-                  )}
-                  
-                  {session && (
-                    <div className="mt-6 bg-white rounded-xl shadow-soft border overflow-hidden">
-                      <div className="p-4 border-b bg-gray-50 flex items-center">
-                        <Shield className="h-4 w-4 mr-2 text-brand-600" />
-                        <h3 className="text-sm font-medium">Anti-Cheat Protection</h3>
-                      </div>
-                      <div className="p-4">
-                        <AntiCheatSettings
-                          antiCheatMode={antiCheatMode}
-                          setAntiCheatMode={handleAntiCheatModeChange}
-                          interventionsEnabled={interventionsEnabled}
-                          toggleInterventions={handleToggleInterventions}
-                          interceptedEvents={interceptedEvents}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <div className="flex items-start gap-3">
-                    <Shield className="h-5 w-5 text-brand-600 shrink-0 mt-0.5" />
-                    <div>
-                      <h3 className="font-medium mb-2 text-brand-900">Secure Sandbox Environment</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div className="bg-white rounded-md p-3 border border-gray-100">
-                          <div className="flex items-center text-sm mb-1 text-muted-foreground">
-                            <Server className="h-3.5 w-3.5 mr-1.5" />
-                            Environment
-                          </div>
-                          <div className="font-medium">{sandboxInfo.environment}</div>
-                        </div>
-                        <div className="bg-white rounded-md p-3 border border-gray-100">
-                          <div className="flex items-center text-sm mb-1 text-muted-foreground">
-                            <Clock className="h-3.5 w-3.5 mr-1.5" />
-                            Time Limit
-                          </div>
-                          <div className="font-medium">{sandboxInfo.timeLimit}</div>
-                        </div>
-                        <div className="bg-white rounded-md p-3 border border-gray-100">
-                          <div className="flex items-center text-sm mb-1 text-muted-foreground">
-                            <AlertCircle className="h-3.5 w-3.5 mr-1.5" />
-                            Memory Limit
-                          </div>
-                          <div className="font-medium">{sandboxInfo.memoryLimit}</div>
-                        </div>
-                        <div className="bg-white rounded-md p-3 border border-gray-100">
-                          <div className="flex items-center text-sm mb-1 text-muted-foreground">
-                            <Shield className="h-3.5 w-3.5 mr-1.5" />
-                            Security Level
-                          </div>
-                          <div className="font-medium">{sandboxInfo.securityLevel}</div>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-3">
-                        Your code is executed in a secure, isolated environment. System calls and network access are restricted.
-                      </p>
-                    </div>
-                  </div>
                 </div>
               </div>
               
-              <div className="lg:col-span-3">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <label htmlFor="language-select" className="text-sm font-medium">
-                        Language:
-                      </label>
-                      <select
-                        id="language-select"
-                        value={language}
-                        onChange={(e) => setLanguage(e.target.value as 'java' | 'cpp' | 'python')}
-                        className="rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      >
-                        <option value="java">Java</option>
-                        <option value="cpp">C++</option>
-                        <option value="python">Python</option>
-                      </select>
+              <div className="md:col-span-2 lg:col-span-3">
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="bg-white rounded-xl shadow-soft border overflow-hidden">
+                    <div className="flex justify-between items-center p-3 border-b">
+                      <div className="flex items-center gap-3">
+                        <label htmlFor="language-select" className="text-sm font-medium">
+                          Language:
+                        </label>
+                        <select
+                          id="language-select"
+                          value={language}
+                          onChange={(e) => setLanguage(e.target.value as 'java' | 'cpp' | 'python')}
+                          className="rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        >
+                          <option value="java">Java</option>
+                          <option value="cpp">C++</option>
+                          <option value="python">Python</option>
+                        </select>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                        >
+                          <Check className="h-4 w-4" />
+                          Submit
+                        </Button>
+                      </div>
                     </div>
                     
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-1"
-                      >
-                        <Check className="h-4 w-4" />
-                        Submit
-                      </Button>
+                    <div className="h-[calc(100vh-380px)] min-h-[300px]">
+                      <CodeEditorPanel
+                        language={language}
+                        onRun={handleCodeRun}
+                        onBehavioralUpdate={handleBehavioralUpdate}
+                      />
                     </div>
                   </div>
                   
-                  <CodeEditorPanel
-                    language={language}
-                    onRun={handleCodeRun}
-                    onBehavioralUpdate={handleBehavioralUpdate}
-                  />
-                  
-                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <div className="flex items-start gap-3">
-                      <Shield className="h-5 w-5 text-brand-600 shrink-0 mt-0.5" />
-                      <div>
-                        <h3 className="font-medium mb-2 text-brand-900">Secure Sandbox Environment</h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div className="bg-white rounded-md p-3 border border-gray-100">
-                            <div className="flex items-center text-sm mb-1 text-muted-foreground">
-                              <Server className="h-3.5 w-3.5 mr-1.5" />
-                              Environment
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {isInterviewActive && (
+                      <div className="md:col-span-2">
+                        <LiveInterview 
+                          isInterviewer={false}
+                          candidateName="John Doe"
+                          interviewerName="Jane Smith"
+                        />
+                      </div>
+                    )}
+                    
+                    {session && (
+                      <div className="bg-white rounded-xl shadow-soft border overflow-hidden">
+                        <div className="p-3 border-b bg-gray-50 flex items-center">
+                          <Eye className="h-4 w-4 mr-2 text-brand-600" />
+                          <h3 className="text-sm font-medium">Behavioral Analytics</h3>
+                        </div>
+                        <div className="p-3 max-h-[200px] overflow-auto">
+                          <BehavioralAnalytics
+                            session={session}
+                            honestyScore={honestyScore}
+                            flagDescriptions={flagDescriptions}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    
+                    {session && (
+                      <div className="bg-white rounded-xl shadow-soft border overflow-hidden">
+                        <div className="p-3 border-b bg-gray-50 flex items-center">
+                          <Shield className="h-4 w-4 mr-2 text-brand-600" />
+                          <h3 className="text-sm font-medium">Anti-Cheat Protection</h3>
+                        </div>
+                        <div className="p-3 max-h-[200px] overflow-auto">
+                          <AntiCheatSettings
+                            antiCheatMode={antiCheatMode}
+                            setAntiCheatMode={handleAntiCheatModeChange}
+                            interventionsEnabled={interventionsEnabled}
+                            toggleInterventions={handleToggleInterventions}
+                            interceptedEvents={interceptedEvents}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="md:col-span-2 bg-gray-50 rounded-lg p-3 border border-gray-200">
+                      <div className="flex items-start gap-3">
+                        <Shield className="h-5 w-5 text-brand-600 shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <h3 className="font-medium mb-2 text-brand-900">Secure Sandbox Environment</h3>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <div className="bg-white rounded-md p-2 border border-gray-100">
+                              <div className="flex items-center text-xs mb-1 text-muted-foreground">
+                                <Server className="h-3.5 w-3.5 mr-1" />
+                                Environment
+                              </div>
+                              <div className="font-medium text-sm">{sandboxInfo.environment}</div>
                             </div>
-                            <div className="font-medium">{sandboxInfo.environment}</div>
-                          </div>
-                          <div className="bg-white rounded-md p-3 border border-gray-100">
-                            <div className="flex items-center text-sm mb-1 text-muted-foreground">
-                              <Clock className="h-3.5 w-3.5 mr-1.5" />
-                              Time Limit
+                            <div className="bg-white rounded-md p-2 border border-gray-100">
+                              <div className="flex items-center text-xs mb-1 text-muted-foreground">
+                                <Clock className="h-3.5 w-3.5 mr-1" />
+                                Time Limit
+                              </div>
+                              <div className="font-medium text-sm">{sandboxInfo.timeLimit}</div>
                             </div>
-                            <div className="font-medium">{sandboxInfo.timeLimit}</div>
-                          </div>
-                          <div className="bg-white rounded-md p-3 border border-gray-100">
-                            <div className="flex items-center text-sm mb-1 text-muted-foreground">
-                              <AlertCircle className="h-3.5 w-3.5 mr-1.5" />
-                              Memory Limit
+                            <div className="bg-white rounded-md p-2 border border-gray-100">
+                              <div className="flex items-center text-xs mb-1 text-muted-foreground">
+                                <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                                Memory Limit
+                              </div>
+                              <div className="font-medium text-sm">{sandboxInfo.memoryLimit}</div>
                             </div>
-                            <div className="font-medium">{sandboxInfo.memoryLimit}</div>
-                          </div>
-                          <div className="bg-white rounded-md p-3 border border-gray-100">
-                            <div className="flex items-center text-sm mb-1 text-muted-foreground">
-                              <Shield className="h-3.5 w-3.5 mr-1.5" />
-                              Security Level
+                            <div className="bg-white rounded-md p-2 border border-gray-100">
+                              <div className="flex items-center text-xs mb-1 text-muted-foreground">
+                                <Shield className="h-3.5 w-3.5 mr-1" />
+                                Security
+                              </div>
+                              <div className="font-medium text-sm">{sandboxInfo.securityLevel}</div>
                             </div>
-                            <div className="font-medium">{sandboxInfo.securityLevel}</div>
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-3">
-                          Your code is executed in a secure, isolated environment. System calls and network access are restricted.
-                        </p>
                       </div>
                     </div>
                   </div>
