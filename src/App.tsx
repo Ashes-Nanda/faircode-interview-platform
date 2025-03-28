@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import CandidateOnboarding from "./pages/CandidateOnboarding";
 import InterviewerOnboarding from "./pages/InterviewerOnboarding";
 import CodeEditor from "./pages/CodeEditor";
+import InterviewSchedule from "./pages/InterviewSchedule";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/candidate" element={<CandidateOnboarding />} />
             <Route path="/interviewer" element={<InterviewerOnboarding />} />
             <Route path="/editor" element={<CodeEditor />} />
+            <Route path="/schedule" element={<InterviewSchedule />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AnimatePresence>

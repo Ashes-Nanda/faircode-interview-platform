@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/Button';
-import { Mic, MicOff, Video, VideoOff, Maximize, Minimize, MessageSquare, Users, Phone } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, Maximize, Minimize, MessageSquare, Users, Phone, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface VideoControlsProps {
@@ -14,6 +14,7 @@ interface VideoControlsProps {
   onToggleFullscreen: () => void;
   onToggleChat: () => void;
   onEndCall: () => void;
+  onScheduleInterview?: () => void;
   className?: string;
 }
 
@@ -27,6 +28,7 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   onToggleFullscreen,
   onToggleChat,
   onEndCall,
+  onScheduleInterview,
   className
 }) => {
   return (
@@ -60,6 +62,18 @@ const VideoControls: React.FC<VideoControlsProps> = ({
       >
         <MessageSquare className="h-5 w-5" />
       </Button>
+      
+      {onScheduleInterview && (
+        <Button
+          onClick={onScheduleInterview}
+          variant="outline"
+          size="icon"
+          className="rounded-full h-10 w-10"
+          aria-label="Schedule Interview"
+        >
+          <Calendar className="h-5 w-5" />
+        </Button>
+      )}
       
       <Button
         onClick={onToggleFullscreen}
