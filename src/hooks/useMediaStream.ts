@@ -19,7 +19,7 @@ export const useMediaStream = (options: MediaStreamOptions) => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
           video: isVideoEnabled, 
-          audio: !isAudioEnabled 
+          audio: isAudioEnabled 
         });
         
         setLocalStream(stream);
@@ -52,7 +52,7 @@ export const useMediaStream = (options: MediaStreamOptions) => {
   const toggleMute = () => {
     if (localStream) {
       localStream.getAudioTracks().forEach(track => {
-        track.enabled = isAudioEnabled; // Toggle opposite of current state
+        track.enabled = !isAudioEnabled; // Toggle opposite of current state
       });
     }
     setIsAudioEnabled(!isAudioEnabled);

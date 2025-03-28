@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MessageSquare, Users, X } from 'lucide-react';
-import { Button } from './Button';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export interface Message {
