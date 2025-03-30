@@ -1,69 +1,152 @@
-# Welcome to your Lovable project
+# ShadowSight Proctor 👁️
 
-## Project info
+A powerful Chrome extension designed to maintain academic integrity during technical interviews and coding assessments. ShadowSight Proctor monitors and prevents unfair practices on coding platforms like LeetCode, HackerEarth, HackerRank, and CodeChef.
 
-**URL**: https://lovable.dev/projects/95839dbc-57c2-44e9-9897-e1e64454b43c
+## 🚀 Features
 
-## How can I edit this code?
+### Core Monitoring Capabilities
+- **Fullscreen Enforcement**: Automatically enters and maintains fullscreen mode during assessments
+- **Tab Switch Detection**: Prevents and reports attempts to switch between tabs
+- **Copy/Paste Prevention**: Blocks unauthorized code copying and pasting
+- **Keyboard Shortcut Control**: Monitors and prevents use of suspicious keyboard combinations
+- **Window Focus Tracking**: Detects attempts to switch windows or applications
 
-There are several ways of editing your application.
+### Anti-Cheating Measures
+- **DOM Manipulation Detection**: 
+  - Identifies hidden content and invisible overlays
+  - Detects semi-transparent solution overlays
+  - Monitors suspicious iframe creation
+  - Catches attempts to inject algorithm solutions
+- **DevTools Prevention**: Detects and reports attempts to open browser developer tools
+- **Algorithm Solution Detection**: Identifies attempts to display solutions through:
+  - Semi-transparent overlays
+  - Hidden DOM elements
+  - Code snippets with specific patterns
 
-**Use Lovable**
+### Security Features
+- **Anti-Tampering Protection**: Prevents modification of critical monitoring functions
+- **Rate-Limited Notifications**: Intelligent notification system to prevent spam
+- **Violation Logging**: Comprehensive logging of all detected violations
+- **Real-time Monitoring**: Instant detection and reporting of suspicious activities
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/95839dbc-57c2-44e9-9897-e1e64454b43c) and start prompting.
+## 📋 Requirements
 
-Changes made via Lovable will be committed automatically to this repo.
+- Google Chrome Browser (Version 88 or higher)
+- Supported coding platforms:
+  - LeetCode
+  - HackerEarth
+  - HackerRank
+  - CodeChef
 
-**Use your preferred IDE**
+## 🔧 Installation
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/shadowsight-proctor.git
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+2. Open Chrome Extensions:
+   - Navigate to `chrome://extensions/`
+   - Enable "Developer mode" in the top right
 
-Follow these steps:
+3. Load the extension:
+   - Click "Load unpacked"
+   - Select the `extension` folder from the cloned repository
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 💻 Usage
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1. **Start Monitoring**:
+   - Click the ShadowSight icon in your Chrome toolbar
+   - Click "Start Monitoring" on any supported coding platform
+   - The page will enter fullscreen mode automatically
 
-# Step 3: Install the necessary dependencies.
-npm i
+2. **During Monitoring**:
+   - A status indicator shows active monitoring
+   - Violations are logged and displayed in the popup
+   - Notifications appear for detected violations
+   - The system prevents common cheating methods
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+3. **Stop Monitoring**:
+   - Click the ShadowSight icon
+   - Click "Stop Monitoring"
+   - The page will exit fullscreen mode
 
-**Edit a file directly in GitHub**
+## 🛡️ Security Measures
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Violation Types Detected
+- `SECURITY_VIOLATION`: Tab switching, fullscreen exit attempts
+- `DOM_MANIPULATION`: Hidden content, overlay injection
+- `CHEATING_ATTEMPT`: Solution overlays, code injection
+- `COPY_PASTE`: Unauthorized code copying
+- `KEYBOARD_SHORTCUT`: Suspicious keyboard combinations
+- `DEVTOOLS_OPEN`: Browser developer tools usage
 
-**Use GitHub Codespaces**
+### Prevention Mechanisms
+- Fullscreen mode enforcement
+- Event listener protection
+- DOM mutation monitoring
+- Keyboard shortcut blocking
+- Copy/paste prevention
+- Window focus tracking
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## ⚙️ Configuration
 
-## What technologies are used for this project?
+The extension supports customizable settings:
+- Tab switch detection
+- DOM manipulation monitoring
+- Copy/paste prevention
+- Notification preferences
+- Violation cooldown periods
 
-This project is built with .
+## 🔍 Debugging
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+For development and testing:
+1. Open Chrome DevTools
+2. Check the console for detailed logs
+3. Monitor the background script via chrome://extensions
+4. Review violation logs in the extension popup
 
-## How can I deploy this project?
+## 🤝 Contributing
 
-Simply open [Lovable](https://lovable.dev/projects/95839dbc-57c2-44e9-9897-e1e64454b43c) and click on Share -> Publish.
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
 
-## I want to use a custom domain - is that possible?
+## 📝 License
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔐 Privacy
+
+ShadowSight Proctor respects user privacy:
+- Only monitors supported coding platforms
+- No personal data collection
+- Local violation storage
+- Transparent monitoring indicators
+
+## ⚠️ Known Limitations
+
+- Requires Chrome browser
+- Fullscreen mode must be allowed
+- Some keyboard shortcuts may be blocked
+- May conflict with other monitoring extensions
+
+## 📞 Support
+
+For issues, feature requests, or questions:
+- Open an issue in the repository
+- Contact the development team
+- Check the documentation
+
+## 🙏 Acknowledgments
+
+- Chrome Extensions API
+- MutationObserver API
+- Fullscreen API
+- Chrome Storage API
+
+---
+
+Built with ❤️ for maintaining academic integrity in technical assessments.
