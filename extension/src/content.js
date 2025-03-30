@@ -51,6 +51,10 @@ const originalFunctions = {
 let isMonitoring = false;
 let lastViolationTime = {};
 const VIOLATION_COOLDOWN = 5000; // 5 seconds cooldown between similar violations
+const GLOBAL_NOTIFICATION_COOLDOWN = 2000; // 2 seconds between any notifications
+let lastGlobalNotificationTime = 0;
+let notificationQueue = [];
+let isProcessingQueue = false;
 
 // Initialize monitoring
 async function initializeMonitoring() {
@@ -175,41 +179,42 @@ function setupDOMObserver(settings) {
 
   // Initial check for existing invisible wrappers
   checkForInvisibleWrappers();
+  checkForSuspiciousCodeElements();
 
   const observer = new MutationObserver((mutations) => {
-    let hasHiddenContent = false;
-    let hasInvisibleWrapper = false;
+    const violations = new Set();
     
     for (const mutation of mutations) {
-      // Check for style changes that might hide content
       if (mutation.type === 'attributes' && 
           (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
         const element = mutation.target;
-        hasHiddenContent = checkElementVisibility(element);
         
-        if (hasHiddenContent) {
-          reportViolation('DOM_MANIPULATION', 'Attempted to hide page content using CSS');
-          break;
+        if (checkElementVisibility(element)) {
+          violations.add('hide page content using CSS');
         }
-
-        // Check if the element is an invisible wrapper
-        hasInvisibleWrapper = checkForInvisibleWrapper(element);
-        if (hasInvisibleWrapper) {
-          break;
+        
+        if (element.tagName === 'PRE' || element.tagName === 'CODE') {
+          checkCodeElementManipulation(element);
         }
       }
       
-      // Check for added nodes that might be wrappers
-      if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+      if (mutation.type === 'childList') {
         for (const node of mutation.addedNodes) {
           if (node.nodeType === Node.ELEMENT_NODE) {
-            hasInvisibleWrapper = checkForInvisibleWrapper(node);
-            if (hasInvisibleWrapper) break;
+            checkForInvisibleWrapper(node);
+            
+            if (node.tagName === 'PRE' || node.tagName === 'CODE') {
+              checkCodeElementManipulation(node);
+            }
           }
         }
-        if (hasInvisibleWrapper) break;
       }
     }
+
+    // Report unique violations
+    violations.forEach(violation => {
+      reportViolation('DOM_MANIPULATION', `Attempted to ${violation}`);
+    });
   });
 
   observer.observe(document.body, {
@@ -275,37 +280,53 @@ function checkForInvisibleWrapper(element) {
 
   const computedStyle = window.getComputedStyle(element);
   
-  // Check for common invisible wrapper techniques
-  const suspiciousConditions = [
-    // Check for transparent overlay
-    computedStyle.position === 'fixed' && 
-    computedStyle.top === '0px' && 
-    computedStyle.left === '0px' && 
-    (computedStyle.width === '100%' || computedStyle.width === '100vw') && 
-    (computedStyle.height === '100%' || computedStyle.height === '100vh'),
+  // Collect all violations instead of reporting immediately
+  const violations = [];
+  
+  // Check for semi-transparent overlays with algorithm solutions
+  const hasLowOpacity = parseFloat(computedStyle.opacity) > 0 && parseFloat(computedStyle.opacity) < 0.3;
+  if (hasLowOpacity) {
+    const content = element.textContent?.toLowerCase() || '';
+    const algorithmKeywords = [
+      'dfs', 'depth first', 'depth-first',
+      'bfs', 'breadth first', 'breadth-first',
+      'recursion', 'recursive',
+      'stack', 'queue',
+      'visited', 'graph',
+      'backtrack', 'backtracking'
+    ];
 
-    // Check for pointer-events manipulation
-    computedStyle.pointerEvents === 'none',
+    const codeIndicators = [
+      'function', 'def ', 'class',
+      'return', 'for', 'while',
+      'if', 'else', '{', '}',
+      '()', '[]', 'array',
+      'list', 'set', 'map'
+    ];
 
-    // Check for z-index stacking
-    computedStyle.position !== 'static' && parseInt(computedStyle.zIndex) > 9000,
+    const hasAlgorithmKeywords = algorithmKeywords.some(keyword => content.includes(keyword));
+    const hasCodeIndicators = codeIndicators.some(indicator => content.includes(indicator));
 
-    // Check for suspicious class names
-    element.className.toLowerCase().includes('overlay') ||
-    element.className.toLowerCase().includes('wrapper') ||
-    element.className.toLowerCase().includes('helper'),
+    if (hasAlgorithmKeywords && hasCodeIndicators) {
+      violations.push('algorithm solution in semi-transparent overlay');
+    }
+  }
 
-    // Check for suspicious IDs
-    element.id.toLowerCase().includes('overlay') ||
-    element.id.toLowerCase().includes('wrapper') ||
-    element.id.toLowerCase().includes('helper'),
+  // Check other conditions and add to violations array
+  if (computedStyle.pointerEvents === 'none') {
+    violations.push('invisible to mouse interaction');
+  }
+  if (parseInt(computedStyle.zIndex) > 9000) {
+    violations.push('suspicious z-index stacking');
+  }
+  if (element.classList.contains('shadow-sight-test-overlay')) {
+    violations.push('test overlay detected');
+  }
 
-    // Check for iframe wrappers
-    element.tagName === 'IFRAME' && computedStyle.opacity === '0'
-  ];
-
-  if (suspiciousConditions.some(condition => condition)) {
-    reportViolation('CHEATING_ATTEMPT', 'Detected potential cheating wrapper or overlay');
+  // Report all violations as a single notification if any found
+  if (violations.length > 0) {
+    reportViolation('CHEATING_ATTEMPT', 
+      `Detected cheating attempt: ${violations.join(', ')}`);
     return true;
   }
 
@@ -361,21 +382,59 @@ function reportViolation(type, details) {
   if (!isMonitoring) return;
 
   const now = Date.now();
-  if (lastViolationTime[type] && (now - lastViolationTime[type]) < VIOLATION_COOLDOWN) {
-    return; // Skip if within cooldown period
-  }
   
-  lastViolationTime[type] = now;
+  // Check type-specific cooldown
+  if (lastViolationTime[type] && (now - lastViolationTime[type]) < VIOLATION_COOLDOWN) {
+    return; // Skip if within cooldown period for this type
+  }
 
-  chrome.runtime.sendMessage({
-    type: 'VIOLATION_DETECTED',
-    violation: {
-      type,
-      details,
-      timestamp: new Date().toISOString(),
-      url: window.location.href
-    }
+  // Add to queue instead of sending immediately
+  notificationQueue.push({
+    type,
+    details,
+    timestamp: new Date().toISOString(),
+    url: window.location.href
   });
+
+  // Start processing queue if not already processing
+  if (!isProcessingQueue) {
+    processNotificationQueue();
+  }
+}
+
+// Add new function to process notification queue
+async function processNotificationQueue() {
+  if (isProcessingQueue || notificationQueue.length === 0) return;
+  
+  isProcessingQueue = true;
+  
+  while (notificationQueue.length > 0) {
+    const now = Date.now();
+    
+    // Check global cooldown
+    if (now - lastGlobalNotificationTime < GLOBAL_NOTIFICATION_COOLDOWN) {
+      await new Promise(resolve => setTimeout(resolve, GLOBAL_NOTIFICATION_COOLDOWN));
+      continue;
+    }
+
+    const violation = notificationQueue.shift();
+    lastViolationTime[violation.type] = now;
+    lastGlobalNotificationTime = now;
+
+    try {
+      await chrome.runtime.sendMessage({
+        type: 'VIOLATION_DETECTED',
+        violation
+      });
+      
+      // Add delay between notifications
+      await new Promise(resolve => setTimeout(resolve, GLOBAL_NOTIFICATION_COOLDOWN));
+    } catch (error) {
+      console.error('Failed to send violation:', error);
+    }
+  }
+
+  isProcessingQueue = false;
 }
 
 // Listen for monitoring status changes
@@ -383,9 +442,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
     case 'START_MONITORING':
       isMonitoring = true;
+      console.log("[ShadowSight] Starting monitoring...");
+      
       initializeMonitoring().then(() => {
+        // Run simulation immediately when monitoring starts
+        console.log("[ShadowSight] Monitoring initialized, running simulation...");
+        injectCheatSimulation();
         sendResponse({ success: true });
       }).catch(error => {
+        console.error("[ShadowSight] Failed to initialize monitoring:", error);
         sendResponse({ success: false, error: 'Failed to initialize monitoring' });
       });
       break;
@@ -428,4 +493,118 @@ function protectFunctions() {
 
 // Initialize protection
 protectFunctions(); 
-protectFunctions(); 
+
+function checkCodeElementManipulation(element) {
+  const computedStyle = window.getComputedStyle(element);
+  const opacity = parseFloat(computedStyle.opacity);
+  
+  if (opacity > 0 && opacity < 0.3) {
+    const content = element.textContent.toLowerCase();
+    if (content.includes('dfs') || 
+        content.includes('depth-first') || 
+        content.includes('recursive')) {
+      reportViolation('CHEATING_ATTEMPT', 'Detected semi-transparent DFS solution code');
+    }
+  }
+}
+
+function checkForSuspiciousCodeElements() {
+  const codeElements = document.querySelectorAll('pre, code');
+  codeElements.forEach(element => {
+    checkCodeElementManipulation(element);
+  });
+}
+
+// Add simulation function for testing
+function injectCheatSimulation() {
+  console.log("[ShadowSight Test] Starting simulation injection...");
+  
+  // Immediate check if we're on LeetCode
+  if (!window.location.hostname.includes('leetcode.com')) {
+    console.log("[ShadowSight Test] Not on LeetCode, simulation aborted");
+    return;
+  }
+
+  // Create and inject the overlay immediately
+  const overlay = document.createElement("div");
+  overlay.className = "shadow-sight-test-overlay";
+  
+  overlay.innerHTML = `
+    <pre style="margin: 0; font-family: monospace; padding: 10px;">
+<b style="color: #FF0000; font-size: 16px;">🧠 Two Sum Solution (Test Overlay)</b>
+
+function twoSum(nums, target) {
+    const map = new Map();
+    
+    for (let i = 0; i < nums.length; i++) {
+        const complement = target - nums[i];
+        
+        if (map.has(complement)) {
+            return [map.get(complement), i];
+        }
+        
+        map.set(nums[i], i);
+    }
+    
+    return []; // No solution found
+}
+
+// Example usage:
+const nums = [2, 7, 11, 15];
+const target = 9;
+console.log(twoSum(nums, target)); // [0, 1]
+    </pre>
+  `;
+
+  // Apply more visible styles
+  overlay.style.cssText = `
+    position: fixed;
+    top: 20%;
+    left: 20%;
+    width: 500px;
+    height: auto;
+    opacity: 0.8;
+    z-index: 999999;
+    background: #1a1a1a;
+    color: #00FF99;
+    font-size: 14px;
+    border: 3px solid #FF0000;
+    padding: 20px;
+    pointer-events: none;
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+    font-family: 'Courier New', monospace;
+    white-space: pre;
+    overflow: auto;
+    backdrop-filter: blur(5px);
+  `;
+
+  // Add to document and log
+  try {
+    document.body.appendChild(overlay);
+    console.log("[ShadowSight Test] Overlay injected successfully");
+    
+    // Verify injection
+    setTimeout(() => {
+      const injectedOverlay = document.querySelector('.shadow-sight-test-overlay');
+      if (injectedOverlay) {
+        console.log("[ShadowSight Test] Overlay verified in DOM");
+        
+        // Log computed styles
+        const computedStyle = window.getComputedStyle(injectedOverlay);
+        console.log("[ShadowSight Test] Overlay styles:", {
+          position: computedStyle.position,
+          zIndex: computedStyle.zIndex,
+          opacity: computedStyle.opacity,
+          display: computedStyle.display,
+          visibility: computedStyle.visibility
+        });
+      } else {
+        console.log("[ShadowSight Test] Overlay not found in DOM after injection");
+      }
+    }, 100);
+
+  } catch (error) {
+    console.error("[ShadowSight Test] Failed to inject overlay:", error);
+  }
+} 
