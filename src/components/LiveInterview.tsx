@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -12,12 +13,14 @@ interface LiveInterviewProps {
   isInterviewer?: boolean;
   candidateName?: string;
   interviewerName?: string;
+  onEndInterview?: () => void;
 }
 
 const LiveInterview: React.FC<LiveInterviewProps> = ({
   isInterviewer = false,
   candidateName = 'John Doe',
-  interviewerName = 'Jane Smith'
+  interviewerName = 'Jane Smith',
+  onEndInterview
 }) => {
   // State for UI controls
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -82,6 +85,10 @@ const LiveInterview: React.FC<LiveInterviewProps> = ({
 
   // Handle ending call
   const handleEndCall = () => {
+    if (onEndInterview) {
+      onEndInterview();
+    }
+    
     toast.warning('Call ended', {
       description: 'The interview session has been terminated'
     });
