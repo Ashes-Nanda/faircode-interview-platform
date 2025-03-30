@@ -12,6 +12,8 @@ export const useMediaStream = (options: MediaStreamOptions) => {
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [isVideoEnabled, setIsVideoEnabled] = useState(options.video);
   const [isAudioEnabled, setIsAudioEnabled] = useState(options.audio);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
 
   // Initialize the stream
   useEffect(() => {
@@ -45,6 +47,9 @@ export const useMediaStream = (options: MediaStreamOptions) => {
       if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
       }
+      if (screenStream) {
+        screenStream.getTracks().forEach(track => track.stop());
+      }
     };
   }, []);
 
@@ -70,12 +75,61 @@ export const useMediaStream = (options: MediaStreamOptions) => {
     toast.info(isVideoEnabled ? 'Camera disabled' : 'Camera enabled');
   };
 
+  // Toggle screen sharing
+  const toggleScreenShare = async () => {
+    try {
+      if (!isScreenSharing) {
+        // Start screen sharing
+        const displayMediaOptions = {
+          video: {
+            cursor: "always"
+          },
+          audio: false
+        };
+        
+        const stream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+        setScreenStream(stream);
+        setRemoteStream(stream); // For demo, replace remote stream with screen
+        setIsScreenSharing(true);
+        
+        // When user stops sharing via browser UI
+        stream.getVideoTracks()[0].onended = () => {
+          stopScreenSharing();
+        };
+        
+        toast.success('Screen sharing started');
+      } else {
+        stopScreenSharing();
+      }
+    } catch (error) {
+      console.error('Error during screen sharing:', error);
+      toast.error('Failed to share screen');
+    }
+  };
+  
+  const stopScreenSharing = () => {
+    if (screenStream) {
+      screenStream.getTracks().forEach(track => track.stop());
+      setScreenStream(null);
+      
+      // Restore the original video in remote stream
+      if (localStream) {
+        setRemoteStream(localStream);
+      }
+      
+      setIsScreenSharing(false);
+      toast.info('Screen sharing stopped');
+    }
+  };
+
   return {
     localStream,
     remoteStream,
     isVideoEnabled,
     isAudioEnabled,
+    isScreenSharing,
     toggleVideo,
-    toggleMute
+    toggleMute,
+    toggleScreenShare
   };
 };

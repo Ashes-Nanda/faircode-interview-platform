@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Video, VideoOff, Maximize, Minimize, MessageSquare, Phone, Calendar } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, Maximize, Minimize, MessageSquare, Phone, Calendar, Share2, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface VideoControlsProps {
@@ -15,6 +15,10 @@ interface VideoControlsProps {
   onToggleChat: () => void;
   onEndCall: () => void;
   onScheduleInterview?: () => void;
+  onToggleScreenShare?: () => void;
+  isScreenSharing?: boolean;
+  onToggleWhiteboard?: () => void;
+  isWhiteboardActive?: boolean;
   className?: string;
 }
 
@@ -29,6 +33,10 @@ const VideoControls: React.FC<VideoControlsProps> = ({
   onToggleChat,
   onEndCall,
   onScheduleInterview,
+  onToggleScreenShare,
+  isScreenSharing = false,
+  onToggleWhiteboard,
+  isWhiteboardActive = false,
   className
 }) => {
   return (
@@ -52,6 +60,30 @@ const VideoControls: React.FC<VideoControlsProps> = ({
       >
         {isVideoEnabled ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
       </Button>
+      
+      {onToggleScreenShare && (
+        <Button
+          onClick={onToggleScreenShare}
+          variant={isScreenSharing ? "secondary" : "outline"}
+          size="icon"
+          className="rounded-full h-10 w-10"
+          aria-label={isScreenSharing ? "Stop sharing" : "Share screen"}
+        >
+          <Share2 className="h-5 w-5" />
+        </Button>
+      )}
+      
+      {onToggleWhiteboard && (
+        <Button
+          onClick={onToggleWhiteboard}
+          variant={isWhiteboardActive ? "secondary" : "outline"}
+          size="icon"
+          className="rounded-full h-10 w-10"
+          aria-label={isWhiteboardActive ? "Hide whiteboard" : "Show whiteboard"}
+        >
+          <Pencil className="h-5 w-5" />
+        </Button>
+      )}
       
       <Button
         onClick={onToggleChat}

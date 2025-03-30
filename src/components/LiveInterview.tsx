@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import VideoControls from './VideoControls';
 import VideoDisplay from './VideoDisplay';
 import ChatPanel, { Message } from './ChatPanel';
+import Whiteboard from './Whiteboard';
 import { useMediaStream } from '@/hooks/useMediaStream';
 
 interface LiveInterviewProps {
@@ -25,6 +26,7 @@ const LiveInterview: React.FC<LiveInterviewProps> = ({
   // State for UI controls
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isWhiteboardOpen, setIsWhiteboardOpen] = useState(false);
   
   // Container ref for fullscreen
   const containerRef = useRef<HTMLDivElement>(null);
@@ -35,8 +37,10 @@ const LiveInterview: React.FC<LiveInterviewProps> = ({
     remoteStream, 
     isVideoEnabled, 
     isAudioEnabled,
+    isScreenSharing,
     toggleVideo,
-    toggleMute
+    toggleMute,
+    toggleScreenShare
   } = useMediaStream({ 
     video: true, 
     audio: true 
@@ -81,6 +85,14 @@ const LiveInterview: React.FC<LiveInterviewProps> = ({
       timestamp: new Date()
     };
     setMessages([...messages, message]);
+  };
+
+  // Handle toggling whiteboard
+  const handleToggleWhiteboard = () => {
+    setIsWhiteboardOpen(!isWhiteboardOpen);
+    if (!isWhiteboardOpen) {
+      toast.info('Whiteboard opened for collaborative explanations');
+    }
   };
 
   // Handle ending call
@@ -136,10 +148,14 @@ const LiveInterview: React.FC<LiveInterviewProps> = ({
               isVideoEnabled={isVideoEnabled}
               isFullscreen={isFullscreen}
               isChatOpen={isChatOpen}
+              isScreenSharing={isScreenSharing}
+              isWhiteboardActive={isWhiteboardOpen}
               onToggleMute={toggleMute}
               onToggleVideo={toggleVideo}
               onToggleFullscreen={handleToggleFullscreen}
               onToggleChat={() => setIsChatOpen(!isChatOpen)}
+              onToggleScreenShare={toggleScreenShare}
+              onToggleWhiteboard={handleToggleWhiteboard}
               onEndCall={handleEndCall}
             />
           </div>
@@ -158,6 +174,12 @@ const LiveInterview: React.FC<LiveInterviewProps> = ({
           )}
         </AnimatePresence>
       </div>
+
+      {/* Whiteboard overlay */}
+      <Whiteboard 
+        isOpen={isWhiteboardOpen}
+        onClose={() => setIsWhiteboardOpen(false)}
+      />
     </div>
   );
 };
