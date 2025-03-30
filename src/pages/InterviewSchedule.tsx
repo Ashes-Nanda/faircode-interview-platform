@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Container } from '@/components/ui/container';
 import { Navigation } from '@/components/Navigation';
@@ -6,7 +7,7 @@ import ScheduledInterviews from '@/components/ScheduledInterviews';
 import InterviewScheduler from '@/components/InterviewScheduler';
 import { Button } from '@/components/Button';
 import FeedbackForm from '@/components/FeedbackForm';
-import { LiveInterview } from '@/components/LiveInterview';
+import LiveInterview from '@/components/LiveInterview';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import CodeReviewForm from '@/components/CodeReviewForm';
