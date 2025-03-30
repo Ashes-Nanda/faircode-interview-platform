@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { BehavioralAnalytics } from './BehavioralAnalytics';
+import { useBehavioralTracking } from '@/hooks/useBehavioralTracking';
+import { Shield, AlertTriangle } from 'lucide-react';
 
 interface EditorControlsProps {
   onHonestyScoreChange: (score: number, message: string) => void;
@@ -9,6 +12,15 @@ interface EditorControlsProps {
 export function EditorControls({ onHonestyScoreChange }: EditorControlsProps) {
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [overlayActive, setOverlayActive] = useState(false);
+  
+  const {
+    session,
+    honestyScore,
+    flagDescriptions,
+    startTracking,
+    stopTracking,
+    isTracking,
+  } = useBehavioralTracking();
 
   // Function to create and inject the overlay
   const createOverlay = () => {
@@ -93,27 +105,68 @@ export function EditorControls({ onHonestyScoreChange }: EditorControlsProps) {
   // Add this near your other useEffect
   useEffect(() => {
     console.log("EditorControls mounted");
+    startTracking();
     return () => {
-      // Cleanup any existing overlay on unmount
+      stopTracking();
       removeOverlay();
       console.log("EditorControls unmounted");
     };
-  }, []);
+  }, [startTracking, stopTracking]);
 
   return (
-    <div className="flex gap-4 p-4">
-      <Button
-        variant={overlayActive ? "destructive" : "default"}
-        onClick={handleOverlayAttack}
-      >
-        {overlayActive ? "Remove Overlay Attack" : "Simulate Overlay Attack"}
-      </Button>
-      <Button
-        variant={isMonitoring ? "destructive" : "default"}
-        onClick={handleMonitoringToggle}
-      >
-        {isMonitoring ? "Deactivate DOM Monitoring" : "Activate DOM Monitoring"}
-      </Button>
+    <div className="space-y-6">
+      <div className="flex gap-4 p-4">
+        <Button
+          variant={overlayActive ? "destructive" : "default"}
+          onClick={handleOverlayAttack}
+        >
+          {overlayActive ? "Remove Overlay Attack" : "Simulate Overlay Attack"}
+        </Button>
+        <Button
+          variant={isMonitoring ? "destructive" : "default"}
+          onClick={handleMonitoringToggle}
+        >
+          {isMonitoring ? "Deactivate DOM Monitoring" : "Activate DOM Monitoring"}
+        </Button>
+      </div>
+
+      {/* Trust Score Summary */}
+      <div className="p-4 bg-white rounded-lg border shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <Shield className="h-5 w-5 mr-2 text-brand-600" />
+            <h3 className="text-lg font-medium">Trust Score</h3>
+          </div>
+          <div className={`text-2xl font-bold ${
+            honestyScore >= 90 ? 'text-green-500' :
+            honestyScore >= 70 ? 'text-amber-500' : 'text-red-500'
+          }`}>
+            {honestyScore}/100
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="w-full bg-gray-200 rounded-full h-2.5">
+          <div
+            className={`h-2.5 rounded-full transition-all ${
+              honestyScore >= 90 ? 'bg-green-500' :
+              honestyScore >= 70 ? 'bg-amber-500' : 'bg-red-500'
+            }`}
+            style={{ width: `${honestyScore}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Behavioral Analytics */}
+      {session && (
+        <div className="p-4">
+          <BehavioralAnalytics
+            session={session}
+            honestyScore={honestyScore}
+            flagDescriptions={flagDescriptions}
+          />
+        </div>
+      )}
     </div>
   );
 } 

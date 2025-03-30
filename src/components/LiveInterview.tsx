@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -8,7 +7,9 @@ import VideoControls from './VideoControls';
 import VideoDisplay from './VideoDisplay';
 import ChatPanel, { Message } from './ChatPanel';
 import Whiteboard from './Whiteboard';
+import { ActivitySummary } from './ActivitySummary';
 import { useMediaStream } from '@/hooks/useMediaStream';
+import { useBehavioralTracking } from '@/hooks/useBehavioralTracking';
 
 interface LiveInterviewProps {
   isInterviewer?: boolean;
@@ -45,6 +46,14 @@ const LiveInterview: React.FC<LiveInterviewProps> = ({
     video: true, 
     audio: true 
   });
+
+  const { 
+    session,
+    honestyScore,
+    flagDescriptions,
+    startTracking,
+    stopTracking,
+  } = useBehavioralTracking();
 
   // Chat messages state
   const [messages, setMessages] = useState<Message[]>([
@@ -129,7 +138,7 @@ const LiveInterview: React.FC<LiveInterviewProps> = ({
         </div>
       </div>
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1">
         {/* Main video display */}
         <div className={cn(
           "relative flex-1 bg-gray-900 overflow-hidden",
@@ -157,6 +166,15 @@ const LiveInterview: React.FC<LiveInterviewProps> = ({
               onToggleScreenShare={toggleScreenShare}
               onToggleWhiteboard={handleToggleWhiteboard}
               onEndCall={handleEndCall}
+            />
+          </div>
+
+          {/* Activity Summary */}
+          <div className="absolute bottom-24 left-4 right-4">
+            <ActivitySummary
+              session={session}
+              honestyScore={honestyScore}
+              flagDescriptions={flagDescriptions}
             />
           </div>
         </div>
