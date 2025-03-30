@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ShadowSight Proctor 👁️
 
 A powerful Chrome extension designed to maintain academic integrity during technical interviews and coding assessments. ShadowSight Proctor monitors and prevents unfair practices on coding platforms like LeetCode, HackerEarth, HackerRank, and CodeChef.
@@ -150,3 +151,6 @@ For issues, feature requests, or questions:
 ---
 
 Built with ❤️ for maintaining academic integrity in technical assessments.
+=======
+
+>>>>>>> d6148569ad838be013e58045a3dc67571c8c8cad
