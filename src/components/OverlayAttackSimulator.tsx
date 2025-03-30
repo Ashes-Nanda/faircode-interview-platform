@@ -1,15 +1,16 @@
-
 import { useState, useEffect } from "react";
 import { Toggle } from "@/components/ui/toggle";
 import { Eye, EyeOff, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { startDOMMonitoring, stopDOMMonitoring, logRedFlag } from "@/utils/shadowSight";
+import { honestyScoreService } from "@/services/honestyScoreService";
 
 interface OverlayAttackSimulatorProps {
   className?: string;
+  onHonestyScoreChange?: (score: number, message: string) => void;
 }
 
-const OverlayAttackSimulator = ({ className }: OverlayAttackSimulatorProps) => {
+const OverlayAttackSimulator = ({ className, onHonestyScoreChange }: OverlayAttackSimulatorProps) => {
   const [isActive, setIsActive] = useState(false);
   const [monitoringEnabled, setMonitoringEnabled] = useState(false);
 
@@ -35,15 +36,15 @@ const OverlayAttackSimulator = ({ className }: OverlayAttackSimulatorProps) => {
     // Create and inject the overlay div
     const overlay = document.createElement("div");
     overlay.id = "simulated-attack-overlay";
-    overlay.style.position = "absolute";
+    overlay.style.position = "fixed";
     overlay.style.top = "0";
     overlay.style.left = "0";
     overlay.style.width = "100%";
     overlay.style.height = "100%";
-    overlay.style.opacity = "0.01";
+    overlay.style.opacity = "0.4";
     overlay.style.zIndex = "9999";
     overlay.style.pointerEvents = "none";
-    overlay.style.backgroundColor = "transparent";
+    overlay.style.backgroundColor = "rgba(255, 0, 0, 0.4)";
     
     const editorArea = document.querySelector(".CodeMirror, .code-editor-area") || document.body;
     
@@ -60,11 +61,8 @@ const OverlayAttackSimulator = ({ className }: OverlayAttackSimulatorProps) => {
     logRedFlag("overlay", "Simulated attack overlay injected for testing");
     console.warn("[ShadowSight] Simulated overlay element detected on editor area");
     
-    // Show a warning message
-    toast.warning("Simulated overlay active", {
-      description: "ShadowSight would detect this in a real interview.",
-      duration: 4000,
-    });
+    // Record the overlay event
+    honestyScoreService.recordEvent('overlay');
     
     return () => {
       // Cleanup when component unmounts or toggle turns off
@@ -73,6 +71,18 @@ const OverlayAttackSimulator = ({ className }: OverlayAttackSimulatorProps) => {
       }
     };
   }, [isActive]);
+
+  // Effect to handle when both overlay and monitoring are active
+  useEffect(() => {
+    if (isActive && monitoringEnabled && onHonestyScoreChange) {
+      const timeoutId = setTimeout(() => {
+        const score = honestyScoreService.getCurrentScore();
+        onHonestyScoreChange(score, "User flagged due to suspicious behavior");
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isActive, monitoringEnabled, onHonestyScoreChange]);
 
   return (
     <div className={className}>

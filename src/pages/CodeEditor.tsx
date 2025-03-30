@@ -12,6 +12,7 @@ import BehavioralAnalytics from '@/components/BehavioralAnalytics';
 import LiveInterview from '@/components/LiveInterview';
 import AntiCheatSettings from '@/components/AntiCheatSettings';
 import CodeSubmissionFeedback from '@/components/CodeSubmissionFeedback';
+import { EditorControls } from '@/components/EditorControls';
 import { BehavioralSession } from '@/services/behavioralAnalyticsService';
 import { evaluateCode, EvaluationResult } from '@/services/evaluationService';
 import { toast } from 'sonner';
@@ -174,6 +175,14 @@ const CodeEditor = () => {
       description: 'You will receive detailed feedback soon'
     });
     setShowFeedback(false);
+  };
+  
+  const handleHonestyScoreChange = (score: number, message: string) => {
+    setHonestyScore(prev => Math.max(0, prev + score));
+    setFlagDescriptions(prev => ({
+      ...prev,
+      [Date.now().toString()]: message
+    }));
   };
   
   useEffect(() => {

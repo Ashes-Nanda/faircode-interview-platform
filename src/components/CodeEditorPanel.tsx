@@ -8,6 +8,7 @@ import CodeExecutionResults from './CodeExecutionResults';
 import useBehavioralTracking from '@/hooks/useBehavioralTracking';
 import OverlayAttackSimulator from './OverlayAttackSimulator';
 import { toast } from 'sonner';
+import { honestyScoreService } from "@/services/honestyScoreService";
 
 const placeholderCode = {
   java: `// Java code template
@@ -44,13 +45,16 @@ interface CodeEditorPanelProps {
 }
 
 export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
-  initialCode = '// Write your code here\n\n',
+  initialCode,
   language = 'java',
   onRun,
   onBehavioralUpdate,
   className,
 }) => {
-  const [code, setCode] = useState(initialCode);
+  const [code, setCode] = useState(() => {
+    return initialCode || placeholderCode[language];
+  });
+
   const [isRunning, setIsRunning] = useState(false);
   const [output, setOutput] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'editor' | 'output'>('editor');
@@ -58,7 +62,7 @@ export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
   const [executionTime, setExecutionTime] = useState<number>(0);
   const [executionError, setExecutionError] = useState<string | null>(null);
   const [executionSuccess, setExecutionSuccess] = useState<boolean>(false);
-  
+
   const {
     session,
     honestyScore,
@@ -79,6 +83,19 @@ export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
     }
   }, [session, honestyScore, flagDescriptions, onBehavioralUpdate]);
 
+  useEffect(() => {
+    // Set up the honesty score change callback
+    honestyScoreService.setScoreChangeCallback((score) => {
+      if (onBehavioralUpdate && session) {
+        onBehavioralUpdate(session, score, flagDescriptions);
+      }
+    });
+
+    return () => {
+      honestyScoreService.setScoreChangeCallback(null);
+    };
+  }, [onBehavioralUpdate, session, flagDescriptions]);
+
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCode(e.target.value);
     trackKeystroke();
@@ -92,21 +109,21 @@ export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
   const handleRunCode = async () => {
     setIsRunning(true);
     setActiveTab('output');
-    
+
     try {
       const result = await compileAndExecuteCode(code, { language });
-      
+
       setOutput(result.output);
       setExecutionTime(result.executionTime);
       setExecutionError(result.error);
       setExecutionSuccess(result.success);
-      
+
       if (result.success) {
         toast.success('Code executed successfully');
       } else {
         toast.error('Code execution failed');
       }
-      
+
       if (onRun) {
         onRun(code);
       }
@@ -121,36 +138,26 @@ export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
     }
   };
 
-  const langSyntax = {
-    java: 'java',
-    cpp: 'cpp',
-    python: 'python',
-  };
-
-  const editorVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { duration: 0.3 }
-    },
-    exit: { 
-      opacity: 0,
-      transition: { duration: 0.2 }
-    }
-  };
-
   const languageExtensions = {
     java: 'java',
     cpp: 'cpp',
     python: 'py',
   };
 
-  useEffect(() => {
-    setCode(placeholderCode[language]);
-  }, [language]);
+  const editorVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.3 }
+    },
+    exit: {
+      opacity: 0,
+      transition: { duration: 0.2 }
+    }
+  };
 
   return (
-    <div 
+    <div
       className={cn(
         "bg-white rounded-xl border shadow-soft overflow-hidden transition-all",
         isFullscreen ? "fixed inset-0 z-50 rounded-none m-0" : "",
@@ -168,17 +175,28 @@ export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
             main.{languageExtensions[language]}
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
-          <OverlayAttackSimulator className="mr-2" />
-          
+          <OverlayAttackSimulator 
+            className="mr-2" 
+            onHonestyScoreChange={onBehavioralUpdate ? (score, message) => {
+              if (session) {
+                const updatedSession = {
+                  ...session,
+                  flags: [...(session.flags || []), { type: 'overlay_detected', message }]
+                };
+                onBehavioralUpdate(updatedSession, score, { overlay_detected: message });
+              }
+            } : undefined}
+          />
+
           <div className="flex items-center rounded-md border bg-white p-1">
             <button
               onClick={() => setActiveTab('editor')}
               className={cn(
                 "rounded px-2 py-1 text-xs font-medium transition-colors",
-                activeTab === 'editor' 
-                  ? "bg-brand-500 text-white" 
+                activeTab === 'editor'
+                  ? "bg-brand-500 text-white"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -188,15 +206,15 @@ export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
               onClick={() => setActiveTab('output')}
               className={cn(
                 "rounded px-2 py-1 text-xs font-medium transition-colors",
-                activeTab === 'output' 
-                  ? "bg-brand-500 text-white" 
+                activeTab === 'output'
+                  ? "bg-brand-500 text-white"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
               Output
             </button>
           </div>
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -238,7 +256,7 @@ export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
                     </div>
                   ))}
                 </div>
-                
+
                 <textarea
                   value={code}
                   onChange={handleCodeChange}
@@ -265,7 +283,7 @@ export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
                   </span>
                 </div>
               </div>
-              
+
               <div className="p-4">
                 {isRunning ? (
                   <div className="flex items-center justify-center h-[300px]">
