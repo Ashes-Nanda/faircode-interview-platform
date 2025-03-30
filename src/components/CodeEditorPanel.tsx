@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { ArrowLeft, ArrowRight, Code, Play, Check, Loader2, Lock } from 'lucide-react';
@@ -7,6 +6,7 @@ import { Button } from './Button';
 import { compileAndExecuteCode } from '@/services/compilerService';
 import CodeExecutionResults from './CodeExecutionResults';
 import useBehavioralTracking from '@/hooks/useBehavioralTracking';
+import OverlayAttackSimulator from './OverlayAttackSimulator';
 import { toast } from 'sonner';
 
 interface CodeEditorPanelProps {
@@ -33,7 +33,6 @@ export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
   const [executionError, setExecutionError] = useState<string | null>(null);
   const [executionSuccess, setExecutionSuccess] = useState<boolean>(false);
   
-  // Use the behavioral tracking hook
   const {
     session,
     honestyScore,
@@ -44,14 +43,12 @@ export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
     isTracking
   } = useBehavioralTracking();
 
-  // Start tracking when the component mounts
   useEffect(() => {
     startTracking();
   }, [startTracking]);
 
-  // Update parent component with behavioral data whenever it changes
   useEffect(() => {
-    if (onBehavioralUpdate) {
+    if (onBehavioralUpdate && session) {
       onBehavioralUpdate(session, honestyScore, flagDescriptions);
     }
   }, [session, honestyScore, flagDescriptions, onBehavioralUpdate]);
@@ -71,7 +68,6 @@ export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
     setActiveTab('output');
     
     try {
-      // Use our compiler service
       const result = await compileAndExecuteCode(code, { language });
       
       setOutput(result.output);
@@ -123,25 +119,6 @@ export const CodeEditorPanel: React.FC<CodeEditorPanelProps> = ({
     python: 'py',
   };
 
-  // Sample placeholder code for demonstration
-  const placeholderCode = {
-    java: `public class HelloWorld {
-    public static void main(String[] args) {
-        System.out.println("Hello, World!");
-    }
-}`,
-    cpp: `#include <iostream>
-
-int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
-}`,
-    python: `def greet():
-    print("Hello, World!")
-
-greet()`,
-  };
-
   useEffect(() => {
     setCode(placeholderCode[language]);
   }, [language]);
@@ -154,7 +131,6 @@ greet()`,
         className
       )}
     >
-      {/* Editor Header */}
       <div className="flex items-center justify-between border-b p-3 bg-gray-50">
         <div className="flex items-center space-x-2">
           <div className="flex items-center space-x-1.5">
@@ -168,6 +144,8 @@ greet()`,
         </div>
         
         <div className="flex items-center space-x-2">
+          <OverlayAttackSimulator className="mr-2" />
+          
           <div className="flex items-center rounded-md border bg-white p-1">
             <button
               onClick={() => setActiveTab('editor')}
@@ -215,7 +193,6 @@ greet()`,
         </div>
       </div>
 
-      {/* Editor Body */}
       <div className="h-[400px] overflow-auto relative">
         <AnimatePresence mode="wait">
           {activeTab === 'editor' ? (
@@ -228,7 +205,6 @@ greet()`,
               className="h-full"
             >
               <div className="flex h-full">
-                {/* Line numbers */}
                 <div className="bg-gray-50 text-right pr-2 pt-2 select-none border-r border-gray-100">
                   {Array.from({ length: code.split('\n').length }).map((_, i) => (
                     <div key={i} className="text-xs text-muted-foreground px-2">
@@ -237,7 +213,6 @@ greet()`,
                   ))}
                 </div>
                 
-                {/* Code area */}
                 <textarea
                   value={code}
                   onChange={handleCodeChange}

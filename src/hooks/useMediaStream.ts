@@ -80,11 +80,8 @@ export const useMediaStream = (options: MediaStreamOptions) => {
     try {
       if (!isScreenSharing) {
         // Start screen sharing
-        // Fix: Updated to match the correct DisplayMediaStreamOptions interface
         const displayMediaOptions: DisplayMediaStreamOptions = {
-          video: {
-            cursor: "always" as ConstrainDOMString,
-          },
+          video: true, // Fixed: Using a boolean instead of an object with 'cursor' property
           audio: false
         };
         
