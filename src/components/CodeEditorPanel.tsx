@@ -9,6 +9,32 @@ import useBehavioralTracking from '@/hooks/useBehavioralTracking';
 import OverlayAttackSimulator from './OverlayAttackSimulator';
 import { toast } from 'sonner';
 
+const placeholderCode = {
+  java: `// Java code template
+public class Solution {
+    public static void main(String[] args) {
+        // Write your code here
+        System.out.println("Hello, world!");
+    }
+}`,
+  cpp: `// C++ code template
+#include <iostream>
+
+int main() {
+    // Write your code here
+    std::cout << "Hello, world!" << std::endl;
+    return 0;
+}`,
+  python: `# Python code template
+def solution():
+    # Write your code here
+    print("Hello, world!")
+
+if __name__ == "__main__":
+    solution()
+`
+};
+
 interface CodeEditorPanelProps {
   initialCode?: string;
   language?: 'java' | 'cpp' | 'python';
