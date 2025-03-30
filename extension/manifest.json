@@ -1,0 +1,53 @@
+{
+  "manifest_version": 3,
+  "name": "ShadowSight Proctor",
+  "version": "1.0",
+  "description": "Interview proctoring extension for monitoring candidate behavior",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "webNavigation",
+    "scripting",
+    "notifications",
+    "alarms"
+  ],
+  "host_permissions": [
+    "*://*.leetcode.com/*",
+    "*://*.hackerearth.com/*",
+    "*://*.hackerrank.com/*",
+    "*://*.codechef.com/*",
+    "http://localhost:5173/*"
+  ],
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "public/icon16.png",
+      "48": "public/icon48.png",
+      "128": "public/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "public/icon16.png",
+    "48": "public/icon48.png",
+    "128": "public/icon128.png"
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.leetcode.com/*",
+        "*://*.hackerearth.com/*",
+        "*://*.hackerrank.com/*",
+        "*://*.codechef.com/*"
+      ],
+      "js": ["src/content.js"],
+      "run_at": "document_start"
+    }
+  ]
+} 

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ShadowSight Proctor</title>
+  <style>
+    body {
+      width: 350px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #dc2626;
+    }
+    .status-indicator.active {
+      background-color: #16a34a;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #1d4ed8;
+    }
+    button.stop {
+      background-color: #dc2626;
+    }
+    button.stop:hover {
+      background-color: #b91c1c;
+    }
+    .violations {
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .violation-item {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .violation-item:last-child {
+      border-bottom: none;
+    }
+    .violation-time {
+      color: #6b7280;
+      font-size: 0.875rem;
+    }
+    .violation-type {
+      font-weight: 600;
+      margin: 4px 0;
+    }
+    .violation-details {
+      color: #4b5563;
+      font-size: 0.875rem;
+    }
+    .settings {
+      margin-top: 12px;
+    }
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>ShadowSight Proctor</h2>
+      <div class="status">
+        <div id="status-indicator" class="status-indicator"></div>
+        <span id="status-text">Inactive</span>
+      </div>
+    </div>
+
+    <button id="toggle-monitoring">Start Monitoring</button>
+
+    <div class="settings">
+      <h3>Monitoring Settings</h3>
+      <div class="setting-item">
+        <label>Tab Switch Detection</label>
+        <input type="checkbox" id="tab-switch" checked>
+      </div>
+      <div class="setting-item">
+        <label>DOM Manipulation Detection</label>
+        <input type="checkbox" id="dom-manipulation" checked>
+      </div>
+      <div class="setting-item">
+        <label>Copy/Paste Detection</label>
+        <input type="checkbox" id="copy-paste" checked>
+      </div>
+    </div>
+
+    <h3>Violations Log</h3>
+    <div id="violations-list" class="violations">
+      <!-- Violations will be populated here -->
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html> 

@@ -1,0 +1,11 @@
+{
+  "name": "shadowsight-proctor",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "convert-icons": "node convert-icons.js"
+  },
+  "dependencies": {
+    "sharp": "^0.33.2"
+  }
+} 
