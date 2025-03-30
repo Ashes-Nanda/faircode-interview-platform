@@ -13,6 +13,7 @@ export interface EvaluationResult {
   testResults: TestResult[];
   score: number;
   passed: boolean;
+  executionTime?: number;
 }
 
 /**
@@ -56,19 +57,19 @@ export const evaluateCode = async (
     }
   ];
   
-  // This is a simulation - in a real app, we would actually run the code
-  // against the test cases in a secure environment
+  // This demonstrates a more deterministic approach for demo purposes
+  // In a real implementation, we would actually run the code against each test case
   const testResults: TestResult[] = testCases.map((testCase, index) => {
-    // Simulate different results
-    // In a real implementation, we would compile and run the code against each test case
-    const passed = Math.random() > 0.3; // 70% chance to pass each test
+    // For demo: make first 3 tests pass, and randomly determine the others
+    // This creates a more predictable demo while still showing both passing and failing tests
+    const passed = index < 3 ? true : Math.random() > 0.4;
     
     return {
       passed,
       message: passed ? 'Test passed successfully' : 'Failed to match expected output',
       testCase: testCase.description,
       expected: testCase.expectedOutput,
-      actual: passed ? testCase.expectedOutput : `[${index},${index+2}]`
+      actual: passed ? testCase.expectedOutput : `[${index},${Math.floor(Math.random() * 5)}]`
     };
   });
   
@@ -78,6 +79,28 @@ export const evaluateCode = async (
   return {
     testResults,
     score,
-    passed: score >= 70 // Pass if 70% or more tests pass
+    passed: score >= 70, // Pass if 70% or more tests pass
+    executionTime: Math.round(Math.random() * 500) + 100 // Simulate execution time between 100-600ms
   };
+};
+
+// New function to generate AI feedback on code
+export const generateCodeFeedback = async (
+  code: string,
+  language: 'java' | 'cpp' | 'python',
+  testResults: TestResult[]
+): Promise<string> => {
+  // Simulate network delay for AI processing
+  await new Promise(resolve => setTimeout(resolve, 3000));
+  
+  // This is a mock function - in a real app this would call an AI service
+  const passRate = testResults.filter(t => t.passed).length / testResults.length;
+  
+  if (passRate === 1) {
+    return "Your solution is correct and passes all test cases. The algorithm has optimal time complexity and is well-structured. Great job handling edge cases!";
+  } else if (passRate >= 0.7) {
+    return "Your solution passes most test cases but has some issues. Consider edge cases like empty arrays or duplicate values. There might be a more optimal approach with better time complexity.";
+  } else {
+    return "Your solution doesn't handle most test cases correctly. Review your algorithm logic, particularly how you're finding the pairs that sum to the target. Consider using a hash map to improve efficiency.";
+  }
 };
