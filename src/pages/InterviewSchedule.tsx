@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Container } from '@/components/ui/container';
 import { Navigation } from '@/components/Navigation';
@@ -14,10 +13,6 @@ import CodeReviewForm from '@/components/CodeReviewForm';
 import { evaluateCode, generateCodeFeedback } from '@/services/evaluationService';
 import TestResultsPanel from '@/components/TestResultsPanel';
 import CodeEditorPanel from '@/components/CodeEditorPanel';
-
-// Added for UUID generation
-<lov-add-dependency>uuid@9.0.1</lov-add-dependency>
-<lov-add-dependency>@types/uuid@9.0.8</lov-add-dependency>
 
 interface Interview {
   id: string;
@@ -58,7 +53,6 @@ const InterviewSchedule: React.FC = () => {
   const [selectedInterview, setSelectedInterview] = useState<string | null>(null);
   const [isLiveInterview, setIsLiveInterview] = useState(false);
   
-  // New states for code submission and review functionality
   const [showCodeEditor, setShowCodeEditor] = useState(false);
   const [showTestResults, setShowTestResults] = useState(false);
   const [showCodeReview, setShowCodeReview] = useState(false);
@@ -85,7 +79,6 @@ const InterviewSchedule: React.FC = () => {
   const handleJoinInterview = (id: string) => {
     setSelectedInterview(id);
     setIsLiveInterview(true);
-    // In a real app, this would initiate a WebRTC connection
     sessionStorage.setItem('interview_active', 'true');
     toast.success('Joined interview session');
   };
@@ -93,7 +86,6 @@ const InterviewSchedule: React.FC = () => {
   const handleEndInterview = () => {
     setIsLiveInterview(false);
     sessionStorage.removeItem('interview_active');
-    // Show code editor after interview ends
     setShowCodeEditor(true);
   };
   
@@ -130,7 +122,6 @@ const InterviewSchedule: React.FC = () => {
     toast.success('Feedback submitted successfully');
   };
   
-  // New handlers for code submission functionality
   const handleCodeChange = (code: string) => {
     setCurrentCode(code);
   };
@@ -181,7 +172,6 @@ const InterviewSchedule: React.FC = () => {
     toast.success('Code review submitted');
     setShowCodeReview(false);
     
-    // In a real app, this would be saved to a database
     console.log('Code review:', review);
   };
   
@@ -210,7 +200,6 @@ const InterviewSchedule: React.FC = () => {
         </div>
       </Container>
       
-      {/* Modals and overlays */}
       {showScheduler && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <InterviewScheduler 
@@ -236,7 +225,6 @@ const InterviewSchedule: React.FC = () => {
         </div>
       )}
       
-      {/* New modals for code submission and review */}
       {showCodeEditor && (
         <div className="fixed inset-0 bg-gray-900/95 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-lg max-w-4xl w-full overflow-hidden">
@@ -297,8 +285,6 @@ const InterviewSchedule: React.FC = () => {
                 setTestResults(null);
                 setAiFeedback(null);
                 
-                // For demo purposes, show code review form when closing test results
-                // In a real app, this might be triggered by an interviewer action
                 if (testResults.score >= 70) {
                   setTimeout(() => handleRequestCodeReview(), 500);
                 }
