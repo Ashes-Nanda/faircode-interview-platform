@@ -11,6 +11,7 @@ import CandidateOnboarding from "./pages/CandidateOnboarding";
 import InterviewerOnboarding from "./pages/InterviewerOnboarding";
 import CodeEditor from "./pages/CodeEditor";
 import InterviewSchedule from "./pages/InterviewSchedule";
+import CandidateDashboard from "./pages/CandidateDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/candidate" element={<CandidateOnboarding />} />
+            <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
             <Route path="/interviewer" element={<InterviewerOnboarding />} />
             <Route path="/editor" element={<CodeEditor />} />
             <Route path="/schedule" element={<InterviewSchedule />} />

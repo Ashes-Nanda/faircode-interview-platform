@@ -16,6 +16,7 @@ export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,10 +24,14 @@ export const Navigation = () => {
     };
 
     window.addEventListener('scroll', handleScroll);
+    
+    // Check if user is on dashboard page to simulate logged in state
+    setIsLoggedIn(location.pathname.includes('/dashboard'));
+    
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [location.pathname]);
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -76,14 +81,45 @@ export const Navigation = () => {
                 {item.name}
               </Link>
             ))}
+            
+            {/* Show Dashboard link if logged in */}
+            {isLoggedIn && (
+              <Link
+                to="/candidate/dashboard"
+                className={`relative px-3 py-2 rounded-md text-sm transition-colors ${
+                  location.pathname === '/candidate/dashboard'
+                    ? 'text-foreground font-medium'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {location.pathname === '/candidate/dashboard' && (
+                  <motion.div
+                    layoutId="nav-indicator"
+                    className="absolute inset-0 bg-brand-50 rounded-md -z-10"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                )}
+                Dashboard
+              </Link>
+            )}
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm">
-              Log in
-            </Button>
-            <Button>
-              Sign up
-            </Button>
+            {isLoggedIn ? (
+              <Button as={Link} to="/candidate/dashboard">
+                My Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" as={Link} to="/candidate">
+                  Log in
+                </Button>
+                <Button as={Link} to="/candidate">
+                  Sign up
+                </Button>
+              </>
+            )}
           </div>
         </div>
 
@@ -122,13 +158,36 @@ export const Navigation = () => {
                 {item.name}
               </Link>
             ))}
+            
+            {/* Show Dashboard link if logged in */}
+            {isLoggedIn && (
+              <Link
+                to="/candidate/dashboard"
+                className={`px-3 py-2 rounded-md text-sm ${
+                  location.pathname === '/candidate/dashboard'
+                    ? 'bg-brand-50 text-foreground font-medium'
+                    : 'text-muted-foreground'
+                }`}
+              >
+                Dashboard
+              </Link>
+            )}
+            
             <div className="flex flex-col gap-2 pt-2 border-t mt-2">
-              <Button variant="ghost" className="justify-start">
-                Log in
-              </Button>
-              <Button className="justify-start">
-                Sign up
-              </Button>
+              {isLoggedIn ? (
+                <Button as={Link} to="/candidate/dashboard" className="justify-start">
+                  My Dashboard
+                </Button>
+              ) : (
+                <>
+                  <Button variant="ghost" className="justify-start" as={Link} to="/candidate">
+                    Log in
+                  </Button>
+                  <Button className="justify-start" as={Link} to="/candidate">
+                    Sign up
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </motion.div>

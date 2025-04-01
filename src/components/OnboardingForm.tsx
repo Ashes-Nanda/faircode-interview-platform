@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from './Button';
 import { CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface FormField {
   id: string;
@@ -18,6 +19,7 @@ interface OnboardingFormProps {
   fields: FormField[];
   submitText: string;
   onSubmit: (data: Record<string, string>) => void;
+  userType?: 'candidate' | 'interviewer';
 }
 
 export const OnboardingForm: React.FC<OnboardingFormProps> = ({
@@ -25,11 +27,13 @@ export const OnboardingForm: React.FC<OnboardingFormProps> = ({
   subtitle,
   fields,
   submitText,
-  onSubmit
+  onSubmit,
+  userType = 'candidate'
 }) => {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -76,6 +80,11 @@ export const OnboardingForm: React.FC<OnboardingFormProps> = ({
     }
   };
 
+  const handleContinue = () => {
+    // Redirect based on user type
+    navigate(userType === 'candidate' ? '/candidate/dashboard' : '/interviewer/dashboard');
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-soft border border-gray-100 p-6 md:p-8">
       {isSuccess ? (
@@ -92,7 +101,14 @@ export const OnboardingForm: React.FC<OnboardingFormProps> = ({
           <p className="text-muted-foreground max-w-md mb-6">
             Thank you for registering. You'll receive a confirmation email shortly with next steps.
           </p>
-          <Button variant="outline">Return to Home</Button>
+          <div className="space-x-3">
+            <Button variant="outline" as={Link} to="/">
+              Return to Home
+            </Button>
+            <Button onClick={handleContinue}>
+              Continue to Dashboard
+            </Button>
+          </div>
         </motion.div>
       ) : (
         <motion.div
