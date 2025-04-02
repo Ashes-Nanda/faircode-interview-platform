@@ -84,7 +84,7 @@ export const evaluateCode = async (
   };
 };
 
-// New function to generate AI feedback on code
+// Function to generate AI feedback on code
 export const generateCodeFeedback = async (
   code: string,
   language: 'java' | 'cpp' | 'python',
@@ -103,4 +103,55 @@ export const generateCodeFeedback = async (
   } else {
     return "Your solution doesn't handle most test cases correctly. Review your algorithm logic, particularly how you're finding the pairs that sum to the target. Consider using a hash map to improve efficiency.";
   }
+};
+
+// Function to verify test cases for problem creation
+export const verifyTestCases = async (
+  testCases: {
+    input: string;
+    expectedOutput: string;
+    description?: string;
+  }[],
+  language: 'java' | 'cpp' | 'python',
+  solutionCode: string
+): Promise<boolean> => {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  
+  // In a real app, this would actually run the solution against the test cases to verify them
+  // For this demo, we'll just simulate a successful verification
+  return true;
+};
+
+// Function to validate problem description format
+export const validateProblemFormat = (
+  description: string,
+  constraints: string[],
+  examples: {
+    input: string;
+    output: string;
+    explanation?: string;
+  }[]
+): {
+  valid: boolean;
+  errors: string[];
+} => {
+  const errors: string[] = [];
+  
+  if (!description.trim()) {
+    errors.push('Problem description cannot be empty');
+  }
+  
+  if (constraints.length === 0 || !constraints.some(c => c.trim())) {
+    errors.push('At least one constraint must be provided');
+  }
+  
+  if (examples.length === 0 || !examples.some(e => e.input && e.output)) {
+    errors.push('At least one example with input and output must be provided');
+  }
+  
+  return {
+    valid: errors.length === 0,
+    errors
+  };
 };
