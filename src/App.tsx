@@ -12,6 +12,7 @@ import InterviewerOnboarding from "./pages/InterviewerOnboarding";
 import CodeEditor from "./pages/CodeEditor";
 import InterviewSchedule from "./pages/InterviewSchedule";
 import CandidateDashboard from "./pages/CandidateDashboard";
+import InterviewerDashboard from "./pages/InterviewerDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/candidate" element={<CandidateOnboarding />} />
             <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
             <Route path="/interviewer" element={<InterviewerOnboarding />} />
+            <Route path="/interviewer/dashboard" element={<InterviewerDashboard />} />
             <Route path="/editor" element={<CodeEditor />} />
             <Route path="/schedule" element={<InterviewSchedule />} />
             <Route path="*" element={<NotFound />} />

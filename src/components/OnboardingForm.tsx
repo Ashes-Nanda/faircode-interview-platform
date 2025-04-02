@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Button } from './Button';
+import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
@@ -102,8 +102,8 @@ export const OnboardingForm: React.FC<OnboardingFormProps> = ({
             Thank you for registering. You'll receive a confirmation email shortly with next steps.
           </p>
           <div className="space-x-3">
-            <Button variant="outline" as={Link} to="/">
-              Return to Home
+            <Button variant="outline" asChild>
+              <Link to="/">Return to Home</Link>
             </Button>
             <Button onClick={handleContinue}>
               Continue to Dashboard

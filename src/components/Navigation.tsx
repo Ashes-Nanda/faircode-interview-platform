@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Button } from './Button';
+import { Button } from "@/components/ui/button";
 import { Menu, X, Code } from 'lucide-react';
 
 const navItems = [
@@ -85,14 +85,16 @@ export const Navigation = () => {
             {/* Show Dashboard link if logged in */}
             {isLoggedIn && (
               <Link
-                to="/candidate/dashboard"
+                to={location.pathname.includes('interviewer') 
+                  ? '/interviewer/dashboard' 
+                  : '/candidate/dashboard'}
                 className={`relative px-3 py-2 rounded-md text-sm transition-colors ${
-                  location.pathname === '/candidate/dashboard'
+                  location.pathname.includes('dashboard')
                     ? 'text-foreground font-medium'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                {location.pathname === '/candidate/dashboard' && (
+                {location.pathname.includes('dashboard') && (
                   <motion.div
                     layoutId="nav-indicator"
                     className="absolute inset-0 bg-brand-50 rounded-md -z-10"
@@ -107,16 +109,20 @@ export const Navigation = () => {
           </div>
           <div className="flex items-center gap-2">
             {isLoggedIn ? (
-              <Button as={Link} to="/candidate/dashboard">
-                My Dashboard
+              <Button asChild>
+                <Link to={location.pathname.includes('interviewer') 
+                  ? '/interviewer/dashboard' 
+                  : '/candidate/dashboard'}>
+                  My Dashboard
+                </Link>
               </Button>
             ) : (
               <>
-                <Button variant="ghost" size="sm" as={Link} to="/candidate">
-                  Log in
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/candidate">Log in</Link>
                 </Button>
-                <Button as={Link} to="/candidate">
-                  Sign up
+                <Button asChild>
+                  <Link to="/candidate">Sign up</Link>
                 </Button>
               </>
             )}
@@ -162,9 +168,11 @@ export const Navigation = () => {
             {/* Show Dashboard link if logged in */}
             {isLoggedIn && (
               <Link
-                to="/candidate/dashboard"
+                to={location.pathname.includes('interviewer') 
+                  ? '/interviewer/dashboard' 
+                  : '/candidate/dashboard'}
                 className={`px-3 py-2 rounded-md text-sm ${
-                  location.pathname === '/candidate/dashboard'
+                  location.pathname.includes('dashboard')
                     ? 'bg-brand-50 text-foreground font-medium'
                     : 'text-muted-foreground'
                 }`}
@@ -175,16 +183,20 @@ export const Navigation = () => {
             
             <div className="flex flex-col gap-2 pt-2 border-t mt-2">
               {isLoggedIn ? (
-                <Button as={Link} to="/candidate/dashboard" className="justify-start">
-                  My Dashboard
+                <Button asChild className="justify-start">
+                  <Link to={location.pathname.includes('interviewer') 
+                    ? '/interviewer/dashboard' 
+                    : '/candidate/dashboard'}>
+                    My Dashboard
+                  </Link>
                 </Button>
               ) : (
                 <>
-                  <Button variant="ghost" className="justify-start" as={Link} to="/candidate">
-                    Log in
+                  <Button variant="ghost" className="justify-start" asChild>
+                    <Link to="/candidate">Log in</Link>
                   </Button>
-                  <Button className="justify-start" as={Link} to="/candidate">
-                    Sign up
+                  <Button className="justify-start" asChild>
+                    <Link to="/candidate">Sign up</Link>
                   </Button>
                 </>
               )}
