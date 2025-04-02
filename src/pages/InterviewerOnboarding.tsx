@@ -139,6 +139,7 @@ const InterviewerOnboarding = () => {
                   fields={interviewerFields}
                   submitText="Create Account"
                   onSubmit={handleSubmit}
+                  userType="interviewer"
                 />
                 
                 <div className="mt-6 bg-gray-50 rounded-lg p-4 border text-center">

@@ -81,8 +81,8 @@ export const OnboardingForm: React.FC<OnboardingFormProps> = ({
   };
 
   const handleContinue = () => {
-    // Redirect based on user type
-    navigate(userType === 'candidate' ? '/candidate/dashboard' : '/interviewer/dashboard');
+    // Redirect based on user type - fixed the path for interviewer
+    navigate(userType === 'interviewer' ? '/interviewer/dashboard' : '/candidate/dashboard');
   };
 
   return (
